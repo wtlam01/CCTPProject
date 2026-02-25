@@ -24,8 +24,6 @@ MonoBehaviour:
     m_path: Assets/Scenes/HomePage.unity
   - m_enabled: 1
     m_path: Assets/Scenes/Chapter1.unity
-  - m_enabled: 1
-    m_path: Assets/Scenes/Chapter2.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
