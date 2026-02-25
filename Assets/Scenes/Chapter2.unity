@@ -309,6 +309,7 @@ RectTransform:
   - {fileID: 1285585904}
   - {fileID: 299094431}
   - {fileID: 530251922}
+  - {fileID: 1425069265}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -558,7 +559,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &530251920
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -888,6 +889,113 @@ RectTransform:
   m_AnchoredPosition: {x: 0.0024414062, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1425069264
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1425069265}
+  - component: {fileID: 1425069269}
+  - component: {fileID: 1425069268}
+  - component: {fileID: 1425069267}
+  - component: {fileID: 1425069266}
+  m_Layer: 5
+  m_Name: FingerHint (Image)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1425069265
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425069264}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 114648162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 501, y: -409}
+  m_SizeDelta: {x: 304.053, y: 296.168}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1425069266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425069264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff07e733edb5e4485bf5d2a5b7c92cf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SwipeHintAnimator
+  fingerRect: {fileID: 1425069265}
+  canvasGroup: {fileID: 1425069267}
+  moveDistance: 120
+  moveDuration: 1.2
+  fadeDuration: 0.8
+  delayBetween: 0.5
+--- !u!225 &1425069267
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425069264}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1425069268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425069264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -7164639588303836088, guid: e0145a96bc7b044c8a02557921abd3c1, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1425069269
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425069264}
+  m_CullTransparentMesh: 1
 --- !u!1 &1562664456
 GameObject:
   m_ObjectHideFlags: 0
@@ -1023,14 +1131,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74c3053e76f324396a84c30fe95f134d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SegmentedVideoSwipe_NewInput
-  introGroup: {fileID: 1327239342}
+  introOverlayGroup: {fileID: 1327239342}
   introHoldTime: 1.5
   introFadeDuration: 1.5
   sofaImage: {fileID: 299094430}
   videoRawImage: {fileID: 1285585903}
-  swipeHint: {fileID: 530251920}
   videoPlayer: {fileID: 1562664457}
   sofaShowTime: 2
+  swipeHintText: {fileID: 0}
+  fingerAnimator: {fileID: 1425069266}
+  fingerHintFallback: {fileID: 0}
+  firstVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4
+  nextVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4
   stopTimes:
   - 1.8
   - 3.8
@@ -1038,7 +1150,7 @@ MonoBehaviour:
   - 7.8
   - 9.8
   - 11.8
-  - 13.4
+  - 12.8
   swipeThreshold: 120
 --- !u!1 &1691372892
 GameObject:
