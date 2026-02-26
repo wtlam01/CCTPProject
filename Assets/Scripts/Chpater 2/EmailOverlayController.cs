@@ -6,22 +6,32 @@ using TMPro;
 public class EmailOverlayController : MonoBehaviour
 {
     [Header("Root Group (static)")]
-    public RectTransform emailGroup;
-    public CanvasGroup emailGroupCanvasGroup;
+    public RectTransform emailGroup;                 // EmailGroup（唔郁）
+    public CanvasGroup emailGroupCanvasGroup;        // 可留空，自動抓
 
     [Header("Panel to animate (move this only)")]
-    public RectTransform emailPanelObject;
+    public RectTransform emailPanelObject;           // EmailPanel（要推上去嗰個）
 
     [Header("Input")]
-    public TMP_InputField inputField;
-    public TMP_Text maskedDisplayText;
+    public TMP_InputField inputField;                // TMP InputField
+    public TMP_Text maskedDisplayText;               // MaskedText（你新建嘅 TMP_Text）
     public bool useXMask = true;
 
-    [Tooltip("true: 打幾多字就顯示幾多個 x")]
+    [Tooltip("如果 true：打幾多字就顯示幾多個 x")]
     public bool maskMatchLength = true;
 
-    [Tooltip("false: 固定顯示 maskText（例如 xxxxxx）")]
+    [Tooltip("如果 false：固定顯示 maskText（例如 xxxxxx）")]
     public string maskText = "xxxxxx";
+
+    [Header("True caret settings (TMP real cursor)")]
+    public bool useTrueCaret = true;
+    public Color caretColor = Color.black;
+    public int caretWidth = 2;
+
+    [Header("Optional caret blink (fake cursor)")]
+    public bool blinkCaret = false;                  // 想要游標閃就開（建議關，因為你要真 caret）
+    public string caretChar = "|";
+    public float caretBlinkSpeed = 0.5f;
 
     [Header("Send Button")]
     public Button sendButton;
@@ -37,7 +47,7 @@ public class EmailOverlayController : MonoBehaviour
     string realInput = "";
     bool sent = false;
 
-    bool suppressCallback = false;
+    Coroutine caretRoutine;
 
     void Awake()
     {
@@ -63,12 +73,30 @@ public class EmailOverlayController : MonoBehaviour
             inputField.onValueChanged.RemoveListener(OnInputChanged);
             inputField.onValueChanged.AddListener(OnInputChanged);
 
-            // ✅ 重要：保留 caret 可見，所以唔好把 textComponent alpha 設 0
-            // 反而我哋會用「清空顯示文字」方法，只留 caret
-            inputField.text = "";
+            // ✅ 仍然隱藏 InputField 自己顯示文字（保留可輸入）
+            // （但真 caret 會因為透明而可能消失，所以要配合下面 useTrueCaret）
+            if (inputField.textComponent != null)
+            {
+                var c = inputField.textComponent.color;
+                c.a = 0f; // 你想完全唔見真字
+                inputField.textComponent.color = c;
+            }
+
+            // ✅ 真 caret：強制用 customCaretColor（多數情況下就算文字透明都仍可見 caret）
+            if (useTrueCaret)
+            {
+                inputField.customCaretColor = true;
+                inputField.caretColor = caretColor;     // alpha 要 1
+                inputField.caretWidth = caretWidth;
+
+                // 可選：避免 selection 藍底干擾（你唔想見到就設透明）
+                var sel = inputField.selectionColor;
+                sel.a = 0f;
+                inputField.selectionColor = sel;
+            }
         }
 
-        UpdateMaskDisplay();
+        UpdateMaskDisplay(false);
     }
 
     void OnEnable()
@@ -94,30 +122,38 @@ public class EmailOverlayController : MonoBehaviour
         }
 
         realInput = "";
+        if (inputField != null) inputField.text = "";
 
-        if (inputField != null)
-        {
-            suppressCallback = true;
-            inputField.text = "";             // 顯示文字清空
-            suppressCallback = false;
-        }
-
-        UpdateMaskDisplay();
-
-        // ✅ Email 一出現就自動 focus
+        // ✅ 重點：Email 出現就自動 focus InputField
         StartCoroutine(AutoFocusInputNextFrame());
+
+        // caret blink（假 |）
+        StopCaret();
+        if (blinkCaret)
+            caretRoutine = StartCoroutine(CaretBlinkLoop());
+        else
+            UpdateMaskDisplay(false);
+    }
+
+    void OnDisable()
+    {
+        StopCaret();
     }
 
     IEnumerator AutoFocusInputNextFrame()
     {
+        // 等一 frame，確保 UI 已經 active & EventSystem ready
         yield return null;
 
         if (inputField == null) yield break;
 
         inputField.interactable = true;
+
+        // Select + ActivateInputField 先可以唔 click 就打到字
         inputField.Select();
         inputField.ActivateInputField();
 
+        // 有時會失焦，再補一次
         yield return null;
         inputField.Select();
         inputField.ActivateInputField();
@@ -125,39 +161,67 @@ public class EmailOverlayController : MonoBehaviour
 
     void OnInputChanged(string current)
     {
-        if (sent || suppressCallback) return;
-
-        // current 係 InputField 入面顯示緊嘅字
-        // 我哋要「真實輸入」存去 realInput，但 InputField 顯示要清空（留 caret）
+        if (sent) return;
 
         realInput = current;
 
-        // 清空 InputField 顯示文字，但唔影響 realInput
-        suppressCallback = true;
-        inputField.text = "";
-        inputField.caretPosition = 0;        // caret 留喺開頭（你想喺尾都得）
-        suppressCallback = false;
-
-        UpdateMaskDisplay();
+        // 一輸入就更新
+        UpdateMaskDisplay(false);
     }
 
-    void UpdateMaskDisplay()
+    void UpdateMaskDisplay(bool caretOn)
+{
+    if (maskedDisplayText == null) return;
+
+    if (!useXMask)
     {
-        if (maskedDisplayText == null) return;
+        maskedDisplayText.text = realInput + (caretOn ? caretChar : "");
+        return;
+    }
 
-        if (!useXMask)
-        {
-            maskedDisplayText.text = realInput;
-            return;
-        }
+    string masked;
 
-        if (maskMatchLength)
+    if (maskMatchLength)
+    {
+        // ✅ 保留換行，其他字變 x
+        System.Text.StringBuilder sb = new System.Text.StringBuilder(realInput.Length);
+        for (int i = 0; i < realInput.Length; i++)
         {
-            maskedDisplayText.text = new string('x', realInput.Length);
+            char ch = realInput[i];
+            if (ch == '\n' || ch == '\r')
+                sb.Append(ch);
+            else
+                sb.Append('x');
         }
-        else
+        masked = sb.ToString();
+    }
+    else
+    {
+        // 固定顯示 maskText（如果你想多行都固定顯示，呢個模式唔建議）
+        masked = string.IsNullOrEmpty(realInput) ? "" : maskText;
+    }
+
+    maskedDisplayText.text = masked + (caretOn ? caretChar : "");
+}
+
+    IEnumerator CaretBlinkLoop()
+    {
+        bool caretOn = false;
+
+        while (!sent)
         {
-            maskedDisplayText.text = string.IsNullOrEmpty(realInput) ? "" : maskText;
+            caretOn = !caretOn;
+            UpdateMaskDisplay(caretOn);
+            yield return new WaitForSecondsRealtime(caretBlinkSpeed);
+        }
+    }
+
+    void StopCaret()
+    {
+        if (caretRoutine != null)
+        {
+            StopCoroutine(caretRoutine);
+            caretRoutine = null;
         }
     }
 
@@ -165,6 +229,9 @@ public class EmailOverlayController : MonoBehaviour
     {
         if (sent) return;
         sent = true;
+
+        StopCaret();
+        UpdateMaskDisplay(false);
 
         StartCoroutine(SlideUpPanelAndHide());
     }
@@ -200,5 +267,8 @@ public class EmailOverlayController : MonoBehaviour
 
         emailPanelObject.anchoredPosition = to;
         if (fadeOutPanel && panelCg != null) panelCg.alpha = 0f;
+
+        // 只推走 panel，EmailBG 會留低
+        // emailPanelObject.gameObject.SetActive(false);
     }
 }
