@@ -6,16 +6,21 @@ using TMPro;
 public class EmailOverlayController : MonoBehaviour
 {
     [Header("Root Group (static)")]
-    public RectTransform emailGroup;          // EmailGroup（唔郁）
-    public CanvasGroup emailGroupCanvasGroup; // 可留空，自動抓
+    public RectTransform emailGroup;
+    public CanvasGroup emailGroupCanvasGroup;
 
     [Header("Panel to animate (move this only)")]
-    public RectTransform emailPanelObject;    // EmailPanel（要推上去嗰個）
+    public RectTransform emailPanelObject;
 
     [Header("Input")]
-    public TMP_InputField inputField;         // TMP InputField
-    public TMP_Text maskedDisplayText;        // 你新建嘅 MaskedText
+    public TMP_InputField inputField;
+    public TMP_Text maskedDisplayText;
     public bool useXMask = true;
+
+    [Tooltip("true: 打幾多字就顯示幾多個 x")]
+    public bool maskMatchLength = true;
+
+    [Tooltip("false: 固定顯示 maskText（例如 xxxxxx）")]
     public string maskText = "xxxxxx";
 
     [Header("Send Button")]
@@ -24,7 +29,7 @@ public class EmailOverlayController : MonoBehaviour
     [Header("Slide Up Animation (panel only)")]
     public float slideUpDistance = 900f;
     public float slideDuration = 0.6f;
-    public bool fadeOutPanel = true;          // 淡出 EmailPanel（不是整個 EmailGroup）
+    public bool fadeOutPanel = true;
 
     CanvasGroup panelCg;
     Vector2 panelStartPos;
@@ -32,47 +37,35 @@ public class EmailOverlayController : MonoBehaviour
     string realInput = "";
     bool sent = false;
 
+    bool suppressCallback = false;
+
     void Awake()
     {
-        // Auto-assign
-        if (emailGroup == null)
-        {
-            // 如果你係掛喺 EmailGroup 上，呢句就會抓到
-            emailGroup = GetComponent<RectTransform>();
-        }
-
+        if (emailGroup == null) emailGroup = GetComponent<RectTransform>();
         if (emailGroup != null && emailGroupCanvasGroup == null)
             emailGroupCanvasGroup = emailGroup.GetComponent<CanvasGroup>();
 
-        // Panel CanvasGroup（用來 fade panel）
         if (emailPanelObject != null)
         {
             panelCg = emailPanelObject.GetComponent<CanvasGroup>();
             if (panelCg == null) panelCg = emailPanelObject.gameObject.AddComponent<CanvasGroup>();
-
             panelStartPos = emailPanelObject.anchoredPosition;
         }
 
-        // Button wiring
         if (sendButton != null)
         {
             sendButton.onClick.RemoveListener(OnSendClicked);
             sendButton.onClick.AddListener(OnSendClicked);
         }
 
-        // Input wiring
         if (inputField != null)
         {
             inputField.onValueChanged.RemoveListener(OnInputChanged);
             inputField.onValueChanged.AddListener(OnInputChanged);
 
-            // 隱藏 InputField 自己顯示文字（保留可輸入）
-            if (inputField.textComponent != null)
-            {
-                var c = inputField.textComponent.color;
-                c.a = 0f;
-                inputField.textComponent.color = c;
-            }
+            // ✅ 重要：保留 caret 可見，所以唔好把 textComponent alpha 設 0
+            // 反而我哋會用「清空顯示文字」方法，只留 caret
+            inputField.text = "";
         }
 
         UpdateMaskDisplay();
@@ -82,7 +75,6 @@ public class EmailOverlayController : MonoBehaviour
     {
         sent = false;
 
-        // 確保 EmailGroup 可互動（打得入、按得到）
         if (emailGroupCanvasGroup != null)
         {
             emailGroupCanvasGroup.alpha = 1f;
@@ -90,7 +82,6 @@ public class EmailOverlayController : MonoBehaviour
             emailGroupCanvasGroup.interactable = true;
         }
 
-        // Reset panel
         if (emailPanelObject != null)
         {
             emailPanelObject.anchoredPosition = panelStartPos;
@@ -103,18 +94,50 @@ public class EmailOverlayController : MonoBehaviour
         }
 
         realInput = "";
-        if (inputField != null) inputField.text = "";
+
+        if (inputField != null)
+        {
+            suppressCallback = true;
+            inputField.text = "";             // 顯示文字清空
+            suppressCallback = false;
+        }
+
         UpdateMaskDisplay();
+
+        // ✅ Email 一出現就自動 focus
+        StartCoroutine(AutoFocusInputNextFrame());
+    }
+
+    IEnumerator AutoFocusInputNextFrame()
+    {
+        yield return null;
+
+        if (inputField == null) yield break;
+
+        inputField.interactable = true;
+        inputField.Select();
+        inputField.ActivateInputField();
+
+        yield return null;
+        inputField.Select();
+        inputField.ActivateInputField();
     }
 
     void OnInputChanged(string current)
     {
-        if (sent) return;
+        if (sent || suppressCallback) return;
 
-        // 保存真實輸入
+        // current 係 InputField 入面顯示緊嘅字
+        // 我哋要「真實輸入」存去 realInput，但 InputField 顯示要清空（留 caret）
+
         realInput = current;
 
-        // 你要求：無論打咩都顯示固定 xxxxxx
+        // 清空 InputField 顯示文字，但唔影響 realInput
+        suppressCallback = true;
+        inputField.text = "";
+        inputField.caretPosition = 0;        // caret 留喺開頭（你想喺尾都得）
+        suppressCallback = false;
+
         UpdateMaskDisplay();
     }
 
@@ -128,17 +151,20 @@ public class EmailOverlayController : MonoBehaviour
             return;
         }
 
-        // 你可改：即使冇輸入都顯示 xxxxxx
-        maskedDisplayText.text = string.IsNullOrEmpty(realInput) ? "" : maskText;
+        if (maskMatchLength)
+        {
+            maskedDisplayText.text = new string('x', realInput.Length);
+        }
+        else
+        {
+            maskedDisplayText.text = string.IsNullOrEmpty(realInput) ? "" : maskText;
+        }
     }
 
     public void OnSendClicked()
     {
         if (sent) return;
         sent = true;
-
-        // Debug 真實輸入（需要先取消註解）
-        // Debug.Log("Real input: " + realInput);
 
         StartCoroutine(SlideUpPanelAndHide());
     }
@@ -153,7 +179,6 @@ public class EmailOverlayController : MonoBehaviour
         float t = 0f;
         float startAlpha = (panelCg != null) ? panelCg.alpha : 1f;
 
-        // 動畫期間禁用 panel 互動
         if (panelCg != null)
         {
             panelCg.blocksRaycasts = false;
@@ -175,8 +200,5 @@ public class EmailOverlayController : MonoBehaviour
 
         emailPanelObject.anchoredPosition = to;
         if (fadeOutPanel && panelCg != null) panelCg.alpha = 0f;
-
-        // 你如果要「EmailBG 留低」，就唔好 SetActive(false)
-        // emailPanelObject.gameObject.SetActive(false);
     }
 }
