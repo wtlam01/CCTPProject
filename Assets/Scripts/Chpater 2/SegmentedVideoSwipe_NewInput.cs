@@ -7,24 +7,33 @@ using UnityEngine.InputSystem; // New Input System
 public class SegmentedVideoSwipe_NewInput : MonoBehaviour
 {
     [Header("Intro UI (Chapter Two)")]
-    public CanvasGroup introOverlayGroup;      // IntroOverlay (CanvasGroup)
+    public CanvasGroup introOverlayGroup;      // IntroOverlay 的 CanvasGroup（掛喺 IntroOverlay 物件上）
     public float introHoldTime = 1.5f;
     public float introFadeDuration = 1.5f;
 
     [Header("Sofa / Video UI")]
-    public GameObject sofaImage;              // SofaImage (UI Image)
-    public GameObject videoRawImage;          // VideoRawImage (UI RawImage)
+    public GameObject sofaImage;              // SofaImage (UI Image / GameObject)
+    public GameObject videoRawImage;          // VideoRawImage (UI RawImage / GameObject)
     public VideoPlayer videoPlayer;
     public float sofaShowTime = 2f;
 
     [Header("Swipe Hint UI (optional)")]
-    public GameObject swipeHintText;          // 文字提示 (可留空)
-    public SwipeHintAnimator fingerAnimator;  // 手指動畫腳本 (建議拖呢個)
-    public GameObject fingerHintFallback;     // 或者直接拖 FingerHint GameObject (可留空)
+    public GameObject swipeHintText;          // 文字提示（可留空）
+    public SwipeHintAnimator fingerAnimator;  // 手指提示動畫（建議拖呢個，有就用）
+    public GameObject fingerHintFallback;     // 或者直接拖 FingerHint GameObject（可留空）
+
+    [Header("Fade To Black Overlay (between videos)")]
+    public CanvasGroup blackFadeGroup;        // BlackFadeOverlay 的 CanvasGroup（alpha 初始 0）
+    public float fadeToBlackDuration = 2f;
+    public float fadeFromBlackDuration = 0.8f;
+
+    [Header("After Third Video")]
+    public GameObject emailImage;             // Email PNG 的 UI Image GameObject（初始 SetActive=false）
 
     [Header("Video URLs")]
     public string firstVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4";
-    public string nextVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4";
+    public string secondVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4";
+    public string thirdVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
 
     [Header("Stop Times (seconds) for FIRST video only")]
     public List<double> stopTimes = new List<double>
@@ -42,6 +51,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     bool isPressing = false;
 
     bool hasShownHintOnce = false; // 只顯示一次手指提示（第一次停點）
+    bool switchingVideos = false;  // 防止 loopPointReached 重覆觸發
 
     void Awake()
     {
@@ -53,16 +63,33 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             introOverlayGroup.interactable = true;
         }
 
+        // 黑色淡入淡出 overlay 初始
+        if (blackFadeGroup != null)
+        {
+            blackFadeGroup.alpha = 0f;
+            blackFadeGroup.blocksRaycasts = true;  // 你想遮住互動就 true
+            blackFadeGroup.interactable = true;
+        }
+
         // 初始 UI 狀態
         if (sofaImage != null) sofaImage.SetActive(false);
         if (videoRawImage != null) videoRawImage.SetActive(false);
 
         SetTextHintVisible(false);
         HideFinger();
+
+        if (emailImage != null) emailImage.SetActive(false);
     }
 
     IEnumerator Start()
     {
+        // 註冊播完事件（任何 video 播完都會進 OnVideoFinished）
+        if (videoPlayer != null)
+        {
+            videoPlayer.loopPointReached -= OnVideoFinished;
+            videoPlayer.loopPointReached += OnVideoFinished;
+        }
+
         // 1) Intro：停留 -> 淡出
         if (introOverlayGroup != null)
         {
@@ -90,27 +117,20 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             yield break;
         }
 
-        // 設定第一條影片 URL
-        videoPlayer.Stop();
-        videoPlayer.url = firstVideoURL;
+        // 播第一條（有停點互動）
+        stopIndex = 0;
+        waitingForSwipe = false;
+        hasShownHintOnce = false;
+        switchingVideos = false;
 
-        // 註冊播完事件
-        videoPlayer.loopPointReached -= OnVideoFinished;
-        videoPlayer.loopPointReached += OnVideoFinished;
-
-        // Prepare + Play
-        videoPlayer.Prepare();
-        while (!videoPlayer.isPrepared) yield return null;
-
-        videoPlayer.time = 0;
-        videoPlayer.Play();
+        yield return PlayVideo(firstVideoURL);
     }
 
     void Update()
     {
         if (videoPlayer == null || !videoPlayer.isPrepared) return;
+        if (switchingVideos) return;
 
-        // 只對「第一條影片」做 stopTimes
         bool isFirstVideo = (videoPlayer.url == firstVideoURL);
 
         if (isFirstVideo)
@@ -123,7 +143,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
                     videoPlayer.Pause();
                     waitingForSwipe = true;
 
-                    // 第一次停點先顯示提示，之後唔再顯示手指
+                    // 第一次停點先顯示提示（之後唔再顯示手指）
                     if (!hasShownHintOnce)
                     {
                         ShowFinger();
@@ -170,10 +190,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
                 waitingForSwipe = false;
 
                 // 第一次成功 swipe 後，以後唔再出手指提示
-                if (!hasShownHintOnce)
-                {
-                    hasShownHintOnce = true;
-                }
+                if (!hasShownHintOnce) hasShownHintOnce = true;
 
                 HideFinger();
                 SetTextHintVisible(false);
@@ -186,26 +203,101 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
 
     void OnVideoFinished(VideoPlayer vp)
     {
-        // 只處理第一條影片播完
-        if (vp.url != firstVideoURL) return;
+        if (switchingVideos) return;
 
-        // 如果仲未完成所有停點（例如你跳過/未 swipe 完），唔切片
-        if (stopIndex < stopTimes.Count) return;
+        // 第一條播完：只會喺你已經完成全部 stopTimes 的情況下先進入下一條
+        if (vp.url == firstVideoURL)
+        {
+            if (stopIndex < stopTimes.Count)
+            {
+                // 玩家未 swipe 完就到尾（通常唔會發生，但防呆）
+                return;
+            }
 
-        StartCoroutine(PlayNextVideo_StressOverload());
+            StartCoroutine(SwitchToSecondVideo());
+            return;
+        }
+
+        // 第二條播完：慢慢變黑 -> 播第三條
+        if (vp.url == secondVideoURL)
+        {
+            StartCoroutine(SwitchSecondToThirdWithFade());
+            return;
+        }
+
+        // 第三條播完：顯示 Email PNG
+        if (vp.url == thirdVideoURL)
+        {
+            StartCoroutine(ShowEmailAfterThird());
+            return;
+        }
     }
 
-    IEnumerator PlayNextVideo_StressOverload()
+    IEnumerator SwitchToSecondVideo()
     {
-        // 重置狀態（第二條片暫時唔做停點互動）
+        switchingVideos = true;
+
+        // 第二條暫時無停點互動
         waitingForSwipe = false;
         isPressing = false;
         HideFinger();
         SetTextHintVisible(false);
 
-        // 換 URL -> 第二條影片
+        yield return PlayVideo(secondVideoURL);
+
+        switchingVideos = false;
+    }
+
+    IEnumerator SwitchSecondToThirdWithFade()
+    {
+        switchingVideos = true;
+
+        // 1) 淡去黑色
+        if (blackFadeGroup != null)
+        {
+            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, fadeToBlackDuration);
+        }
+
+        // 2) 換第三條影片
+        yield return PlayVideo(thirdVideoURL);
+
+        // 3) 可選：由黑淡返出嚟（如果你想第三條一開始係黑，再慢慢見到畫面）
+        if (blackFadeGroup != null)
+        {
+            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, fadeFromBlackDuration);
+        }
+
+        switchingVideos = false;
+    }
+
+    IEnumerator ShowEmailAfterThird()
+    {
+        switchingVideos = true;
+
+        // 停止影片
+        if (videoPlayer != null) videoPlayer.Stop();
+
+        // 讓畫面保持黑（你想保持黑就 fade 到 1）
+        if (blackFadeGroup != null)
+        {
+            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, 0.8f);
+        }
+
+        // 顯示 Email PNG
+        if (emailImage != null)
+        {
+            emailImage.SetActive(true);
+        }
+
+        switchingVideos = false;
+    }
+
+    IEnumerator PlayVideo(string url)
+    {
+        if (videoPlayer == null) yield break;
+
         videoPlayer.Stop();
-        videoPlayer.url = nextVideoURL;
+        videoPlayer.url = url;
 
         videoPlayer.Prepare();
         while (!videoPlayer.isPrepared) yield return null;
@@ -250,6 +342,12 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
 
         float t = 0f;
         cg.alpha = from;
+
+        if (duration <= 0.0001f)
+        {
+            cg.alpha = to;
+            yield break;
+        }
 
         while (t < duration)
         {
