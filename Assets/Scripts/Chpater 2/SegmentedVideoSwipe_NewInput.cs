@@ -33,7 +33,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     [Header("Video URLs")]
     public string firstVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4";
     public string secondVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4";
-    public string thirdVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
+    public string thirdVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/311street1.mp4";
 
     [Header("Stop Times (seconds) for FIRST video only")]
     public List<double> stopTimes = new List<double>
