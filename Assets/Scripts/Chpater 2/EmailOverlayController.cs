@@ -17,7 +17,7 @@ public class EmailOverlayController : MonoBehaviour
     public TMP_Text maskedDisplayText;               // MaskedText（你新建嘅 TMP_Text）
     public bool useXMask = true;
 
-    [Tooltip("如果 true：打幾多字就顯示幾多個 x")]
+    [Tooltip("如果 true：打幾多字就顯示幾多個 x（保留換行）")]
     public bool maskMatchLength = true;
 
     [Tooltip("如果 false：固定顯示 maskText（例如 xxxxxx）")]
@@ -29,7 +29,7 @@ public class EmailOverlayController : MonoBehaviour
     public int caretWidth = 2;
 
     [Header("Optional caret blink (fake cursor)")]
-    public bool blinkCaret = false;                  // 想要游標閃就開（建議關，因為你要真 caret）
+    public bool blinkCaret = false;                  // 建議關（你要真 caret）
     public string caretChar = "|";
     public float caretBlinkSpeed = 0.5f;
 
@@ -40,6 +40,11 @@ public class EmailOverlayController : MonoBehaviour
     public float slideUpDistance = 900f;
     public float slideDuration = 0.6f;
     public bool fadeOutPanel = true;
+
+    [Header("After Send -> Show Door")]
+    public GameObject doorButtonObject;              // 拖 DoorButton
+    public GameObject sofaImageObject;               // 拖 SofaImage
+    public GameObject videoRawImageObject;           // (可選) 拖 VideoRawImage
 
     CanvasGroup panelCg;
     Vector2 panelStartPos;
@@ -62,6 +67,12 @@ public class EmailOverlayController : MonoBehaviour
             panelStartPos = emailPanelObject.anchoredPosition;
         }
 
+        // ✅ Door 一開始一定要收埋
+        if (doorButtonObject != null) doorButtonObject.SetActive(false);
+
+        // ✅ Sofa 一開始唔好出（除非你想）
+        if (sofaImageObject != null) sofaImageObject.SetActive(false);
+
         if (sendButton != null)
         {
             sendButton.onClick.RemoveListener(OnSendClicked);
@@ -70,26 +81,27 @@ public class EmailOverlayController : MonoBehaviour
 
         if (inputField != null)
         {
+            // ✅ 你想真游標可以換行：InputField 要 MultiLineNewline
+            inputField.lineType = TMP_InputField.LineType.MultiLineNewline;
+
             inputField.onValueChanged.RemoveListener(OnInputChanged);
             inputField.onValueChanged.AddListener(OnInputChanged);
 
-            // ✅ 仍然隱藏 InputField 自己顯示文字（保留可輸入）
-            // （但真 caret 會因為透明而可能消失，所以要配合下面 useTrueCaret）
+            // 隱藏 InputField 自己顯示文字（保留可輸入）
             if (inputField.textComponent != null)
             {
                 var c = inputField.textComponent.color;
-                c.a = 0f; // 你想完全唔見真字
+                c.a = 0f;
                 inputField.textComponent.color = c;
             }
 
-            // ✅ 真 caret：強制用 customCaretColor（多數情況下就算文字透明都仍可見 caret）
+            // 真 caret
             if (useTrueCaret)
             {
                 inputField.customCaretColor = true;
                 inputField.caretColor = caretColor;     // alpha 要 1
                 inputField.caretWidth = caretWidth;
 
-                // 可選：避免 selection 藍底干擾（你唔想見到就設透明）
                 var sel = inputField.selectionColor;
                 sel.a = 0f;
                 inputField.selectionColor = sel;
@@ -103,6 +115,7 @@ public class EmailOverlayController : MonoBehaviour
     {
         sent = false;
 
+        // EmailGroup 可互動
         if (emailGroupCanvasGroup != null)
         {
             emailGroupCanvasGroup.alpha = 1f;
@@ -110,9 +123,11 @@ public class EmailOverlayController : MonoBehaviour
             emailGroupCanvasGroup.interactable = true;
         }
 
+        // Reset panel
         if (emailPanelObject != null)
         {
             emailPanelObject.anchoredPosition = panelStartPos;
+
             if (panelCg != null)
             {
                 panelCg.alpha = 1f;
@@ -121,18 +136,18 @@ public class EmailOverlayController : MonoBehaviour
             }
         }
 
+        // Door 每次 Email 出現都先收埋
+        if (doorButtonObject != null) doorButtonObject.SetActive(false);
+
         realInput = "";
         if (inputField != null) inputField.text = "";
 
-        // ✅ 重點：Email 出現就自動 focus InputField
+        // ✅ Email 出現就嘗試 focus（Editor 通常 OK；WebGL 可能仍需要玩家先點一下頁面）
         StartCoroutine(AutoFocusInputNextFrame());
 
-        // caret blink（假 |）
         StopCaret();
-        if (blinkCaret)
-            caretRoutine = StartCoroutine(CaretBlinkLoop());
-        else
-            UpdateMaskDisplay(false);
+        if (blinkCaret) caretRoutine = StartCoroutine(CaretBlinkLoop());
+        else UpdateMaskDisplay(false);
     }
 
     void OnDisable()
@@ -142,18 +157,15 @@ public class EmailOverlayController : MonoBehaviour
 
     IEnumerator AutoFocusInputNextFrame()
     {
-        // 等一 frame，確保 UI 已經 active & EventSystem ready
         yield return null;
 
         if (inputField == null) yield break;
 
         inputField.interactable = true;
-
-        // Select + ActivateInputField 先可以唔 click 就打到字
         inputField.Select();
         inputField.ActivateInputField();
 
-        // 有時會失焦，再補一次
+        // 再補一次
         yield return null;
         inputField.Select();
         inputField.ActivateInputField();
@@ -164,45 +176,42 @@ public class EmailOverlayController : MonoBehaviour
         if (sent) return;
 
         realInput = current;
-
-        // 一輸入就更新
         UpdateMaskDisplay(false);
     }
 
     void UpdateMaskDisplay(bool caretOn)
-{
-    if (maskedDisplayText == null) return;
-
-    if (!useXMask)
     {
-        maskedDisplayText.text = realInput + (caretOn ? caretChar : "");
-        return;
-    }
+        if (maskedDisplayText == null) return;
 
-    string masked;
-
-    if (maskMatchLength)
-    {
-        // ✅ 保留換行，其他字變 x
-        System.Text.StringBuilder sb = new System.Text.StringBuilder(realInput.Length);
-        for (int i = 0; i < realInput.Length; i++)
+        if (!useXMask)
         {
-            char ch = realInput[i];
-            if (ch == '\n' || ch == '\r')
-                sb.Append(ch);
-            else
-                sb.Append('x');
+            maskedDisplayText.text = realInput + (caretOn ? caretChar : "");
+            return;
         }
-        masked = sb.ToString();
-    }
-    else
-    {
-        // 固定顯示 maskText（如果你想多行都固定顯示，呢個模式唔建議）
-        masked = string.IsNullOrEmpty(realInput) ? "" : maskText;
-    }
 
-    maskedDisplayText.text = masked + (caretOn ? caretChar : "");
-}
+        string masked;
+
+        if (maskMatchLength)
+        {
+            // ✅ 保留換行，其他字變 x
+            System.Text.StringBuilder sb = new System.Text.StringBuilder(realInput.Length);
+            for (int i = 0; i < realInput.Length; i++)
+            {
+                char ch = realInput[i];
+                if (ch == '\n' || ch == '\r')
+                    sb.Append(ch);
+                else
+                    sb.Append('x');
+            }
+            masked = sb.ToString();
+        }
+        else
+        {
+            masked = string.IsNullOrEmpty(realInput) ? "" : maskText;
+        }
+
+        maskedDisplayText.text = masked + (caretOn ? caretChar : "");
+    }
 
     IEnumerator CaretBlinkLoop()
     {
@@ -233,10 +242,10 @@ public class EmailOverlayController : MonoBehaviour
         StopCaret();
         UpdateMaskDisplay(false);
 
-        StartCoroutine(SlideUpPanelAndHide());
+        StartCoroutine(SlideUpPanelAndThenShowDoor());
     }
 
-    IEnumerator SlideUpPanelAndHide()
+    IEnumerator SlideUpPanelAndThenShowDoor()
     {
         if (emailPanelObject == null) yield break;
 
@@ -268,7 +277,26 @@ public class EmailOverlayController : MonoBehaviour
         emailPanelObject.anchoredPosition = to;
         if (fadeOutPanel && panelCg != null) panelCg.alpha = 0f;
 
-        // 只推走 panel，EmailBG 會留低
-        // emailPanelObject.gameObject.SetActive(false);
+        // ✅ 推走 panel 後：顯示 Door
+        if (doorButtonObject != null) doorButtonObject.SetActive(true);
+
+        // ✅ 令 Door click 一定有效：保證佢係可點（CanvasGroup 無 block 住）
+        // （EmailGroup 仲存在，但 DoorButton 喺 EmailGroup 之外，你而家 hierarchy 係 ok）
+    }
+
+    // ✅ 給 DoorButton 的 Button OnClick 呼叫（最穩）
+    public void GoToSofa()
+    {
+        // 顯示 sofa
+        if (sofaImageObject != null) sofaImageObject.SetActive(true);
+
+        // 關掉影片（可選）
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+
+        // 收埋 Door
+        if (doorButtonObject != null) doorButtonObject.SetActive(false);
+
+        // 收埋 Email 整組（你想 EmailBG 留低就改成只關 EmailPanel）
+        if (emailGroup != null) emailGroup.gameObject.SetActive(false);
     }
 }
