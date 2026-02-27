@@ -2,71 +2,82 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class SofaEmailController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class SofaEmailController : MonoBehaviour
 {
     public enum State { Sofa, CheckEmail }
 
     [Header("Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;     // 你的 VideoRawImage (GameObject)
+    public GameObject videoRawImageObject;     // VideoRawImage (GameObject)
 
-    [Header("Optional: disable other flow script while sofa/email runs")]
+    [Header("Optional: disable other flow script while this runs")]
     public MonoBehaviour flowScriptToDisable;  // 例如 SegmentedVideoSwipe_NewInput
 
     [Header("URLs")]
     public string sofaVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4";
     public string checkEmailURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32CheckEmail.mp4";
 
-    [Header("Email Icon UI")]
-    public GameObject emailButtonObject;   // ✅ 直接控制 SetActive
-    public Button emailButton;             // ✅ Click
-    public Image emailButtonImage;         // ✅ 換 sprite 做 hover
-    public Sprite emailNormal;
-    public Sprite emailHover;
+    [Header("Email Button UI")]
+    public GameObject emailButtonObject;   // EmailButton (整個物件)
+    public Button emailButton;             // EmailButton 上嘅 Button component
 
-    [Header("Check Email Pause & Scroll")]
-    public float pauseAtSeconds = 1f;      // 停在 1 秒
-    public float scrollThreshold = 20f;    // scroll down 多大才算
-    public bool requireScrollDown = true;  // 只接受向下
+    [Header("Hover Scale (optional)")]
+    public RectTransform emailButtonRect;  // EmailButton 的 RectTransform
+    public float hoverScale = 1.12f;
+    public float hoverScaleSpeed = 12f;
+
+    [Header("Check Email Pause + Drag Gate (Hint2 = drag down like Hint1)")]
+    public float pauseAtSeconds = 1f;
+
+    [Tooltip("要按住左鍵拖幾多 pixels（累積）先算完成")]
+    public float dragAccumulation = 140f;
+
+    [Tooltip("true = 必須向下拖 (deltaY < 0); false = 任何方向都算")]
+    public bool requireDragDown = true;
+
+    [Tooltip("拖拉時必須按住左鍵")]
+    public bool requireLeftMouseHeld = true;
+
+    [Header("Finger Hint 2 (Drag Down)")]
+    public SwipeHintAnimator fingerHintDown; // 拖 FingerHint2 (有 SwipeHintAnimator) 入嚟
 
     State state = State.Sofa;
-    bool waitingForScroll = false;
-    Coroutine pauseCo;
 
-    void Reset()
-    {
-        // 方便你一拖上去就有機會自動抓到
-        if (emailButtonObject == null) emailButtonObject = gameObject;
-    }
+    bool waitingForDrag = false;
+    float dragSum = 0f;
+    Vector2 lastMousePos;
+    bool hasLastMousePos = false;
+
+    Vector3 baseScale;
+    bool isHovering = false;
+
+    Coroutine pauseCo;
 
     void Awake()
     {
-        // 綁 video end
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached -= OnVideoFinished;
             videoPlayer.loopPointReached += OnVideoFinished;
         }
 
-        // 綁 click（你就算唔設 Button OnClick，都會 work）
         if (emailButton != null)
         {
             emailButton.onClick.RemoveListener(OnEmailClicked);
             emailButton.onClick.AddListener(OnEmailClicked);
         }
 
-        // 初始 hover sprite
-        SetEmailHover(false);
-    }
+        if (emailButtonRect == null && emailButtonObject != null)
+            emailButtonRect = emailButtonObject.GetComponent<RectTransform>();
 
-void Start()
-{
-    // 測試用：一入場就開 sofa + email icon
-    StartSofaMode();
-}
+        if (emailButtonRect != null)
+            baseScale = emailButtonRect.localScale;
+
+        ShowEmailButton(false);
+        if (fingerHintDown != null) fingerHintDown.StopAndHide();
+    }
 
     void OnDestroy()
     {
@@ -76,40 +87,70 @@ void Start()
 
     void Update()
     {
-        if (!waitingForScroll) return;
+        // Hover scale
+        if (emailButtonRect != null)
+        {
+            Vector3 target = baseScale * (isHovering ? hoverScale : 1f);
+            emailButtonRect.localScale = Vector3.Lerp(
+                emailButtonRect.localScale,
+                target,
+                Time.unscaledDeltaTime * hoverScaleSpeed
+            );
+        }
+
+        // 等 drag 續播
+        if (!waitingForDrag) return;
 
         var mouse = Mouse.current;
         if (mouse == null) return;
 
-        float scrollY = mouse.scroll.ReadValue().y;
-
-        // 大多數平台：scroll down = 負數
-        bool isScrollDown = scrollY < -scrollThreshold;
-        bool isScrollUp = scrollY > scrollThreshold;
-
-        if (requireScrollDown)
+        // 必須按住左鍵先計 drag
+        if (requireLeftMouseHeld && !mouse.leftButton.isPressed)
         {
-            if (isScrollDown)
-            {
-                waitingForScroll = false;
-                if (videoPlayer != null) videoPlayer.Play();
-            }
+            hasLastMousePos = false;
+            return;
         }
-        else
+
+        Vector2 pos = mouse.position.ReadValue();
+
+        if (!hasLastMousePos)
         {
-            if (isScrollDown || isScrollUp)
+            lastMousePos = pos;
+            hasLastMousePos = true;
+            return;
+        }
+
+        Vector2 delta = pos - lastMousePos;
+        lastMousePos = pos;
+
+        // ✅ 向下拖：delta.y < 0
+        if (Mathf.Abs(delta.y) > 0.01f)
+        {
+            bool isDown = delta.y < 0f;
+
+            if (!requireDragDown || isDown)
+                dragSum += Mathf.Abs(delta.y);
+
+            if (dragSum >= dragAccumulation)
             {
-                waitingForScroll = false;
+                dragSum = 0f;
+                waitingForDrag = false;
+                hasLastMousePos = false;
+
+                if (fingerHintDown != null) fingerHintDown.StopAndHide();
                 if (videoPlayer != null) videoPlayer.Play();
             }
         }
     }
 
-    // ✅ 給你從 Door / 或任何地方 call：開始 sofa loop + 顯示 email icon
+    // ✅ 由 DoorClick 之後 call 呢個：開始 sofa + 顯示 email icon
     public void StartSofaMode()
     {
         state = State.Sofa;
-        waitingForScroll = false;
+
+        waitingForDrag = false;
+        dragSum = 0f;
+        hasLastMousePos = false;
 
         if (flowScriptToDisable != null)
             flowScriptToDisable.enabled = false;
@@ -120,41 +161,48 @@ void Start()
         ShowEmailButton(true);
 
         PlayUrl(sofaVideoURL, loop: true);
+
+        if (fingerHintDown != null) fingerHintDown.StopAndHide();
     }
 
-    // ✅ Button dropdown 都可以用（記得 public）
     public void OnEmailClicked()
     {
         if (state != State.Sofa) return;
 
         state = State.CheckEmail;
-        waitingForScroll = false;
 
-        // 播 check email 時先收埋 icon（你想保留都得，改為 true）
-        ShowEmailButton(false);
+        waitingForDrag = false;
+        dragSum = 0f;
+        hasLastMousePos = false;
+
+        ShowEmailButton(false); // 播 email video 時收埋 icon
 
         PlayUrl(checkEmailURL, loop: false);
 
         if (pauseCo != null) StopCoroutine(pauseCo);
-        pauseCo = StartCoroutine(PauseAtTimeThenWaitScroll());
+        pauseCo = StartCoroutine(PauseAtTimeThenWaitDrag());
     }
 
-    IEnumerator PauseAtTimeThenWaitScroll()
+    IEnumerator PauseAtTimeThenWaitDrag()
     {
         if (videoPlayer == null) yield break;
 
-        // 等 prepare
         while (!videoPlayer.isPrepared) yield return null;
 
         videoPlayer.time = 0;
         videoPlayer.Play();
 
-        // 等到 pauseAtSeconds
         while (videoPlayer.time < pauseAtSeconds)
             yield return null;
 
         videoPlayer.Pause();
-        waitingForScroll = true;
+
+        // 顯示「向下拖」finger hint
+        if (fingerHintDown != null) fingerHintDown.ShowAndPlay();
+
+        waitingForDrag = true;
+        dragSum = 0f;
+        hasLastMousePos = false;
     }
 
     void OnVideoFinished(VideoPlayer vp)
@@ -176,11 +224,7 @@ void Start()
         videoPlayer.Prepare();
 
         if (loop)
-        {
-            // sofa：prepare 完就自動播
             StartCoroutine(PlayWhenPrepared());
-        }
-        // checkEmail：由 PauseAtTimeThenWaitScroll() 控制播/停
     }
 
     IEnumerator PlayWhenPrepared()
@@ -197,23 +241,14 @@ void Start()
             emailButtonObject.SetActive(show);
 
         if (emailButton != null)
-        {
             emailButton.interactable = show;
-        }
 
-        // reset hover
-        SetEmailHover(false);
+        isHovering = false;
+        if (emailButtonRect != null)
+            emailButtonRect.localScale = baseScale;
     }
 
-    // ===== Hover support (requires EventSystem + Graphic Raycaster) =====
-    public void OnPointerEnter(PointerEventData eventData) => SetEmailHover(true);
-    public void OnPointerExit(PointerEventData eventData) => SetEmailHover(false);
-
-    public void SetEmailHover(bool hover)
-    {
-        if (emailButtonImage == null) return;
-
-        if (hover && emailHover != null) emailButtonImage.sprite = emailHover;
-        else if (!hover && emailNormal != null) emailButtonImage.sprite = emailNormal;
-    }
+    // ===== 俾 UI EventTrigger 用（Pointer Enter/Exit）=====
+    public void UI_OnPointerEnter() => isHovering = true;
+    public void UI_OnPointerExit() => isHovering = false;
 }

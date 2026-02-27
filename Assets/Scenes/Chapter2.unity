@@ -393,6 +393,7 @@ RectTransform:
   - {fileID: 1666140577}
   - {fileID: 665585602}
   - {fileID: 1470072823}
+  - {fileID: 1619864101}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -994,11 +995,9 @@ MonoBehaviour:
   doorClosedSprite: {fileID: 5213229242370633579, guid: 93984225534904ed2b15589dddc4950f, type: 3}
   doorOpenSprite: {fileID: 4856990145134343996, guid: 644cd77d4d07248a7813c325aa4e7f79, type: 3}
   doorImage: {fileID: 665585606}
-  emailGroup: {fileID: 1666140576}
-  videoRawImage: {fileID: 1285585903}
-  videoPlayer: {fileID: 1562664457}
-  sofaVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4
-  flowScriptToDisable: {fileID: 1562664461}
+  emailGroupToHide: {fileID: 1666140576}
+  sofaEmailController: {fileID: 1562664462}
+  hideOnClick: {fileID: 0}
 --- !u!222 &665585605
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1471,8 +1470,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 70
-  m_fontSizeBase: 70
+  m_fontSize: 65
+  m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2240,6 +2239,7 @@ GameObject:
   - component: {fileID: 1470072822}
   - component: {fileID: 1470072821}
   - component: {fileID: 1470072824}
+  - component: {fileID: 1470072825}
   m_Layer: 5
   m_Name: EmailButton
   m_TagString: Untagged
@@ -2323,7 +2323,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 2
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -2333,7 +2333,7 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
+    m_HighlightedSprite: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
     m_PressedSprite: {fileID: 0}
     m_SelectedSprite: {fileID: 0}
     m_DisabledSprite: {fileID: 0}
@@ -2360,6 +2360,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1470072825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2657a4296d2b249de8aaa2722ec23e93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmailHoverScale
+  hoverScale: 1.1
+  speed: 10
 --- !u!1 &1562664456
 GameObject:
   m_ObjectHideFlags: 0
@@ -2487,12 +2501,121 @@ MonoBehaviour:
   checkEmailURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/32CheckEmail.mp4
   emailButtonObject: {fileID: 1470072820}
   emailButton: {fileID: 1470072824}
-  emailButtonImage: {fileID: 1470072821}
-  emailNormal: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
-  emailHover: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
+  emailButtonRect: {fileID: 1619864101}
+  hoverScale: 1.12
+  hoverScaleSpeed: 12
   pauseAtSeconds: 1
-  scrollThreshold: 20
-  requireScrollDown: 1
+  dragAccumulation: 140
+  requireDragDown: 1
+  requireLeftMouseHeld: 1
+  fingerHintDown: {fileID: 1619864102}
+--- !u!1 &1619864100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1619864101}
+  - component: {fileID: 1619864105}
+  - component: {fileID: 1619864104}
+  - component: {fileID: 1619864103}
+  - component: {fileID: 1619864102}
+  m_Layer: 5
+  m_Name: FingerHint2 (Image)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1619864101
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619864100}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 114648162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 176.63, y: -39.659}
+  m_SizeDelta: {x: 1437, y: -45}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1619864102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619864100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff07e733edb5e4485bf5d2a5b7c92cf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SwipeHintAnimator
+  fingerRect: {fileID: 1619864101}
+  canvasGroup: {fileID: 1619864103}
+  moveDistance: -120
+  moveDuration: 1.2
+  fadeDuration: 0.8
+  delayBetween: 0.5
+--- !u!225 &1619864103
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619864100}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1619864104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619864100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -7164639588303836088, guid: e0145a96bc7b044c8a02557921abd3c1, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1619864105
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619864100}
+  m_CullTransparentMesh: 1
 --- !u!1 &1666140576
 GameObject:
   m_ObjectHideFlags: 0
