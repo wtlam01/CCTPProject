@@ -385,14 +385,14 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1327239343}
-  - {fileID: 1285585904}
   - {fileID: 299094431}
   - {fileID: 530251922}
-  - {fileID: 1425069265}
   - {fileID: 1793488427}
+  - {fileID: 1285585904}
+  - {fileID: 1425069265}
   - {fileID: 1666140577}
   - {fileID: 665585602}
-  - {fileID: 866415796}
+  - {fileID: 1470072823}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -994,10 +994,11 @@ MonoBehaviour:
   doorClosedSprite: {fileID: 5213229242370633579, guid: 93984225534904ed2b15589dddc4950f, type: 3}
   doorOpenSprite: {fileID: 4856990145134343996, guid: 644cd77d4d07248a7813c325aa4e7f79, type: 3}
   doorImage: {fileID: 665585606}
-  sofaImage: {fileID: 866415792}
   emailGroup: {fileID: 1666140576}
   videoRawImage: {fileID: 1285585903}
-  hideOnClick: {fileID: 665585601}
+  videoPlayer: {fileID: 1562664457}
+  sofaVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4
+  flowScriptToDisable: {fileID: 1562664461}
 --- !u!222 &665585605
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1080,9 +1081,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1666140578}
-        m_TargetAssemblyTypeName: EmailOverlayController, Assembly-CSharp
-        m_MethodName: GoToSofa
+      - m_Target: {fileID: 665585603}
+        m_TargetAssemblyTypeName: DoorButtonController, Assembly-CSharp
+        m_MethodName: OnDoorClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1228,94 +1229,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SendButtonHover
   hoverScale: 1.1
   speed: 10
---- !u!1 &866415792
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 866415796}
-  - component: {fileID: 866415795}
-  - component: {fileID: 866415794}
-  - component: {fileID: 866415793}
-  m_Layer: 5
-  m_Name: SofaImage (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!225 &866415793
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 866415792}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
---- !u!114 &866415794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 866415792}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 2345507534981130987, guid: 021e572797773477c8ebc2af7d7aecbc, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &866415795
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 866415792}
-  m_CullTransparentMesh: 1
---- !u!224 &866415796
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 866415792}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 114648162}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 959.59, y: 540.23}
-  m_SizeDelta: {x: 1920, y: 1080}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &890689772
 GameObject:
   m_ObjectHideFlags: 0
@@ -2315,6 +2228,138 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1430354171}
   m_CullTransparentMesh: 1
+--- !u!1 &1470072820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1470072823}
+  - component: {fileID: 1470072822}
+  - component: {fileID: 1470072821}
+  - component: {fileID: 1470072824}
+  m_Layer: 5
+  m_Name: EmailButton
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1470072821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1470072822
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_CullTransparentMesh: 1
+--- !u!224 &1470072823
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 114648162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -65, y: 42}
+  m_SizeDelta: {x: 173, y: 178}
+  m_Pivot: {x: 1, y: 0}
+--- !u!114 &1470072824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1470072821}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1562664462}
+        m_TargetAssemblyTypeName: SofaEmailController, Assembly-CSharp
+        m_MethodName: OnEmailClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1562664456
 GameObject:
   m_ObjectHideFlags: 0
@@ -2326,12 +2371,13 @@ GameObject:
   - component: {fileID: 1562664458}
   - component: {fileID: 1562664457}
   - component: {fileID: 1562664461}
+  - component: {fileID: 1562664462}
   m_Layer: 0
   m_Name: VideoController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!328 &1562664457
 VideoPlayer:
@@ -2422,6 +2468,31 @@ MonoBehaviour:
   - 11.8
   - 12.8
   swipeThreshold: 120
+--- !u!114 &1562664462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562664456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c09ccce55d4ab44fb811d0783598286f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SofaEmailController
+  videoPlayer: {fileID: 1562664457}
+  videoRawImageObject: {fileID: 1285585903}
+  flowScriptToDisable: {fileID: 0}
+  sofaVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4
+  checkEmailURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/32CheckEmail.mp4
+  emailButtonObject: {fileID: 1470072820}
+  emailButton: {fileID: 1470072824}
+  emailButtonImage: {fileID: 1470072821}
+  emailNormal: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
+  emailHover: {fileID: 7810870911928529009, guid: 78a15c1f7d75648dda0f90135aa3ee1b, type: 3}
+  pauseAtSeconds: 1
+  scrollThreshold: 20
+  requireScrollDown: 1
 --- !u!1 &1666140576
 GameObject:
   m_ObjectHideFlags: 0
@@ -2492,7 +2563,7 @@ MonoBehaviour:
   slideDuration: 0.6
   fadeOutPanel: 1
   doorButtonObject: {fileID: 665585601}
-  sofaImageObject: {fileID: 866415792}
+  sofaImageObject: {fileID: 0}
   videoRawImageObject: {fileID: 0}
 --- !u!222 &1666140580
 CanvasRenderer:

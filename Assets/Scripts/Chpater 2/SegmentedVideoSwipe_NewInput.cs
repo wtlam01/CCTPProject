@@ -270,27 +270,27 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         switchingVideos = false;
     }
 
-    IEnumerator ShowEmailAfterThird()
+IEnumerator ShowEmailAfterThird()
+{
+    switchingVideos = true;
+
+    // 停止影片
+    if (videoPlayer != null) videoPlayer.Stop();
+
+    // 讓畫面保持黑
+    if (blackFadeGroup != null)
     {
-        switchingVideos = true;
-
-        // 停止影片
-        if (videoPlayer != null) videoPlayer.Stop();
-
-        // 讓畫面保持黑（你想保持黑就 fade 到 1）
-        if (blackFadeGroup != null)
-        {
-            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, 0.8f);
-        }
-
-        // 顯示 Email PNG
-        if (emailImage != null)
-        {
-            emailImage.SetActive(true);
-        }
-
-        switchingVideos = false;
+        yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, 0.8f);
     }
+
+    // 顯示 Email PNG
+    if (emailImage != null)
+    {
+        emailImage.SetActive(true);
+    }
+
+    switchingVideos = false;
+}
 
     IEnumerator PlayVideo(string url)
     {
