@@ -5,6 +5,6 @@ public class SceneLoader : MonoBehaviour
 {
     public void LoadChapter1()
     {
-        SceneManager.LoadScene("Chapter1");
+        SceneManager.LoadScene("Landing");
     }
 }
