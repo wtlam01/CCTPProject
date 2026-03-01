@@ -306,6 +306,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1949568321}
+  - {fileID: 1603257777}
   - {fileID: 627594686}
   - {fileID: 1887546454}
   - {fileID: 639274277}
@@ -1240,7 +1241,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1603257777
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1250,14 +1251,14 @@ RectTransform:
   m_GameObject: {fileID: 1603257776}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.41765, y: 0.41765, z: 0.41765}
+  m_LocalScale: {x: 0.9998604, y: 0.9998604, z: 0.9998604}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 114648162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 960.34564, y: 539.8056}
+  m_AnchoredPosition: {x: 1339.0818, y: 752.4523}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1603257778
@@ -1423,7 +1424,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1743448162}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70ea1bcc4379c435d8f5b81321ab607d, type: 3}
   m_Name: 
@@ -1474,7 +1475,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95811fa2ad4b54d8bbe2d11ba99ce82f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1DailyHubController
-  loopManager: {fileID: 0}
+  loopManager: {fileID: 1743448168}
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
   studyGroup: {fileID: 639274278}
@@ -1497,9 +1498,9 @@ MonoBehaviour:
   hintShowDelay: 0.25
   restStop1: 6
   restStop2: 10
-  swipePos6s: {fileID: 0}
-  swipePos10s: {fileID: 0}
-  swipeAnim: {fileID: 0}
+  swipePos6s: {fileID: 820086337}
+  swipePos10s: {fileID: 514806528}
+  swipeAnim: {fileID: 1400491279}
   swipeMinDistance: 120
   swipeMaxTime: 0.6
 --- !u!114 &1743448168
@@ -1521,7 +1522,7 @@ MonoBehaviour:
   warningDimGroup: {fileID: 1564364388}
   warningDimAlpha: 0.35
   warningFadeTime: 0.35
-  blackoutGroup: {fileID: 0}
+  blackoutGroup: {fileID: 1603257778}
   blackoutFadeIn: 0.35
   blackoutHold: 0.7
   blackoutFadeOut: 0.35
@@ -1753,7 +1754,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3596745050135394023, guid: facdb693e85b241b6b018fae46e3f5b0, type: 3}
+  m_Sprite: {fileID: 5882301020994159450, guid: 42c86f66f18cc4e07bc72d88cfa3d285, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1777,7 +1778,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 130789814}
   - {fileID: 114648162}
-  - {fileID: 1603257777}
   - {fileID: 38484217}
   - {fileID: 1743448164}
   - {fileID: 1502551104}
