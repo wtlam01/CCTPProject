@@ -1,246 +1,242 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Video;
 using TMPro;
 
 public class Chapter1LoopManager : MonoBehaviour
 {
     [Header("State (hidden from player)")]
-    [SerializeField] int day = 1;            // 1..30
-    [SerializeField] int progress = 0;       // hidden
-    [SerializeField] int fatigue = 0;        // hidden
+    public int Day = 1;
+    public int Progress = 0;
+    public int Fatigue = 0;
 
     [Header("UI (optional display, NOT countdown)")]
-    public TMP_Text dayText;                 // can show subtle label, not "Day x/30"
-    public CanvasGroup warningDimGroup;       // DimOverlay CanvasGroup
+    public TMP_Text dayText;                     // optional
+    public CanvasGroup warningDimGroup;          // DimOverlay CanvasGroup
     public float warningDimAlpha = 0.35f;
     public float warningFadeTime = 0.35f;
 
     [Header("Blackout / System lock")]
-    public CanvasGroup blackoutGroup;        // BlackFadeOverlay CanvasGroup
+    public CanvasGroup blackoutGroup;            // BlackFadeOverlay CanvasGroup
     public float blackoutFadeIn = 0.35f;
     public float blackoutHold = 0.7f;
     public float blackoutFadeOut = 0.35f;
 
     [Header("Thresholds")]
-    public int warningMin = 6;               // 6..8 warning zone
+    public int warningMin = 6;
     public int warningMax = 8;
-    public int overworkThreshold = 10;       // >=10 triggers blackout
+
+    public int overworkThreshold = 10;
     public int overworkSkipDays = 5;
-    public int overworkProgressPenalty = 4;
-    public int overworkFatigueReset = 3;
+    public int overworkProgressLoss = 4;
+    public int overworkResetFatigue = 3;
 
     [Header("Result")]
-    public CanvasGroup resultOverlay;        // optional
-    public TMP_Text resultText;              // optional
-    public int passProgress = 28;            // >=28 pass
+    public int finalDay = 30;
+    public int passProgress = 28;
+    public CanvasGroup resultOverlay;            // optional
+    public TMP_Text resultText;                  // optional
 
-    public bool IsBusy { get; private set; }
+    [Header("Video Core (shared VideoPlayer)")]
+    public VideoPlayer videoPlayer;
 
-    void Awake()
+    [Header("Video URLs")]
+    public string overworkVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4";
+    public string successVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
+    public string failureVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
+
+    public bool IsBusy => _busy;
+    bool _busy;
+
+    Coroutine _dimCo;
+
+    void Start()
     {
-        if (blackoutGroup != null)
-        {
-            blackoutGroup.alpha = 0;
-            blackoutGroup.gameObject.SetActive(false);
-            blackoutGroup.blocksRaycasts = false;
-        }
-
-        if (warningDimGroup != null)
-        {
-            warningDimGroup.alpha = 0;
-            warningDimGroup.blocksRaycasts = false;
-            warningDimGroup.interactable = false;
-        }
-
-        if (resultOverlay != null)
-        {
-            resultOverlay.alpha = 0;
-            resultOverlay.gameObject.SetActive(false);
-            resultOverlay.blocksRaycasts = false;
-        }
-
-        RefreshDayLabel();
-        RefreshWarningVisual();
+        ApplyWarningDim();
+        UpdateDayText();
+        HideCanvasGroup(blackoutGroup, instant:true);
+        HideCanvasGroup(resultOverlay, instant:true);
     }
 
-    // ---------- Public API: called after each daily action ----------
-    public void ApplyStudy()
+    public void AddDay(int v)      { Day += v; ClampState(); UpdateDayText(); }
+    public void AddProgress(int v) { Progress += v; ClampState(); }
+    public void AddFatigue(int v)  { Fatigue += v; ClampState(); ApplyWarningDim(); }
+
+    public void SetFatigue(int v)  { Fatigue = v; ClampState(); ApplyWarningDim(); }
+    public void SetDay(int v)      { Day = v; ClampState(); UpdateDayText(); }
+
+    public void ClampState()
     {
-        // day +1, progress +2, fatigue +2
-        AdvanceDay(1);
-        progress += 2;
-        fatigue += 2;
-        AfterStatsChanged();
+        if (Day < 1) Day = 1;
+        if (Progress < 0) Progress = 0;
+        if (Fatigue < 0) Fatigue = 0;
+        if (Day > finalDay) Day = finalDay;
     }
 
-    public void ApplyRest()
+    void UpdateDayText()
     {
-        // day +1, progress +0, fatigue -1
-        AdvanceDay(1);
-        fatigue -= 1;
-        AfterStatsChanged();
+        if (dayText != null) dayText.text = Day.ToString();
     }
 
-    public void ApplyPlayAvoid()
-    {
-        // 你可以自訂：例如 progress -1 / fatigue -0 (or +1)
-        // 重點係「不確定」：可以有少少隨機，但唔好顯示數值
-        AdvanceDay(1);
-
-        // option A：固定
-        progress -= 1;
-        fatigue += 0;
-
-        // option B：少少不確定（可開啟）
-        // int roll = Random.Range(0, 3); // 0,1,2
-        // if (roll == 0) { progress += 1; fatigue += 1; }    // "短暫放鬆反而回復少少"
-        // if (roll == 1) { progress -= 1; fatigue += 0; }    // "拖延"
-        // if (roll == 2) { progress -= 2; fatigue += 1; }    // "壓力反彈"
-        
-        AfterStatsChanged();
-    }
-
-    void AfterStatsChanged()
-    {
-        ClampStats();
-        RefreshDayLabel();
-        RefreshWarningVisual();
-
-        // if reached day 30 -> show results
-        if (day >= 30)
-        {
-            day = 30;
-            StartCoroutine(ShowResultsRoutine());
-            return;
-        }
-
-        // if overwork -> blackout lock + auto skip
-        if (fatigue >= overworkThreshold)
-        {
-            StartCoroutine(OverworkRoutine());
-        }
-    }
-
-    void ClampStats()
-    {
-        if (fatigue < 0) fatigue = 0;
-        if (progress < 0) progress = 0;
-    }
-
-    void AdvanceDay(int delta)
-    {
-        day += delta;
-        if (day > 30) day = 30;
-    }
-
-    void RefreshDayLabel()
-    {
-        if (dayText == null) return;
-
-        // ✅ 唔顯示 countdown：你可以用更「含糊」嘅文字
-        // 例：只顯示「今日」/「又一日」/「第 X 日」都得，但唔寫 /30
-        dayText.text = $"又一日"; 
-        // 或者你想要 subtle：dayText.text = $"記錄 #{day}";
-    }
-
-    void RefreshWarningVisual()
+    public void ApplyWarningDim()
     {
         if (warningDimGroup == null) return;
 
-        bool inWarning = fatigue >= warningMin && fatigue <= warningMax;
-        StopAllCoroutines(); // avoid stacking fades (simple)
-        StartCoroutine(FadeCanvasGroup(warningDimGroup, warningDimGroup.alpha, inWarning ? warningDimAlpha : 0f, warningFadeTime));
+        bool inWarning = (Fatigue >= warningMin && Fatigue <= warningMax);
+        float targetA = inWarning ? warningDimAlpha : 0f;
+
+        if (_dimCo != null) StopCoroutine(_dimCo);
+        _dimCo = StartCoroutine(FadeCanvasGroup(warningDimGroup, targetA, warningFadeTime));
+    }
+
+    // 每次玩家做完一日選擇後呼叫
+    public void AfterDailyChoice(System.Action onFinished)
+    {
+        if (_busy) return;
+        StartCoroutine(AfterChoiceRoutine(onFinished));
+    }
+
+    IEnumerator AfterChoiceRoutine(System.Action onFinished)
+    {
+        _busy = true;
+
+        // Day 30 result 優先
+        if (Day >= finalDay)
+        {
+            yield return ResultRoutine();
+            // result 後保持 busy（鎖死）
+            yield break;
+        }
+
+        // Overwork
+        if (Fatigue >= overworkThreshold)
+        {
+            yield return OverworkRoutine();
+        }
+
+        _busy = false;
+        onFinished?.Invoke();
     }
 
     IEnumerator OverworkRoutine()
     {
-        if (IsBusy) yield break;
-        IsBusy = true;
-
-        // lock input visually
+        // blackout overlay
         if (blackoutGroup != null)
         {
-            blackoutGroup.gameObject.SetActive(true);
-            blackoutGroup.blocksRaycasts = true;
-            yield return FadeCanvasGroup(blackoutGroup, 0f, 1f, blackoutFadeIn);
+            yield return FadeCanvasGroup(blackoutGroup, 1f, blackoutFadeIn);
+            yield return new WaitForSecondsRealtime(blackoutHold);
         }
 
-        yield return new WaitForSecondsRealtime(blackoutHold);
+        // play fire video
+        yield return PlayUrlAndWait(overworkVideoURL);
 
-        // system override
-        AdvanceDay(overworkSkipDays);
-        progress -= overworkProgressPenalty;
-        fatigue = overworkFatigueReset;
-        ClampStats();
+        // apply rules
+        Day += overworkSkipDays;
+        Progress -= overworkProgressLoss;
+        if (Progress < 0) Progress = 0;
+        Fatigue = overworkResetFatigue;
 
-        RefreshDayLabel();
-        RefreshWarningVisual();
+        ClampState();
+        ApplyWarningDim();
+        UpdateDayText();
 
+        // fade out blackout
         if (blackoutGroup != null)
         {
-            yield return FadeCanvasGroup(blackoutGroup, 1f, 0f, blackoutFadeOut);
-            blackoutGroup.blocksRaycasts = false;
-            blackoutGroup.gameObject.SetActive(false);
+            yield return FadeCanvasGroup(blackoutGroup, 0f, blackoutFadeOut);
         }
 
-        // if skip pushes to day30 -> results
-        if (day >= 30)
+        // 如果 overwork 直接跳到 day30
+        if (Day >= finalDay)
         {
-            day = 30;
-            yield return ShowResultsRoutine();
+            yield return ResultRoutine();
         }
-
-        IsBusy = false;
     }
 
-    IEnumerator ShowResultsRoutine()
+    IEnumerator ResultRoutine()
     {
-        if (IsBusy) yield break;
-        IsBusy = true;
-
-        // optional blackout before results
-        if (blackoutGroup != null)
-        {
-            blackoutGroup.gameObject.SetActive(true);
-            blackoutGroup.blocksRaycasts = true;
-            yield return FadeCanvasGroup(blackoutGroup, 0f, 1f, blackoutFadeIn);
-        }
-
-        // show results overlay
+        // optional overlay
         if (resultOverlay != null)
         {
-            resultOverlay.gameObject.SetActive(true);
-            resultOverlay.blocksRaycasts = true;
-
-            if (resultText != null)
-            {
-                bool pass = progress >= passProgress;
-                resultText.text = pass ? "Results released\n\nYou made it." : "Results released\n\nNot this time.";
-            }
-
-            resultOverlay.alpha = 0f;
-            yield return FadeCanvasGroup(resultOverlay, 0f, 1f, 0.35f);
+            ShowCanvasGroup(resultOverlay, 1f, instant:true);
         }
 
-        // keep blackout behind, or fade out if you want
-        // (你亦可以喺呢度 Load ending scene / show ending image)
+        if (resultText != null)
+        {
+            resultText.text = "Results released";
+        }
 
-        IsBusy = false;
+        // play success/failure
+        if (Progress >= passProgress)
+        {
+            yield return PlayUrlAndWait(successVideoURL);
+        }
+        else
+        {
+            yield return PlayUrlAndWait(failureVideoURL);
+        }
+
+        // result 後保持停留（你可加 restart/menu）
+        _busy = true;
     }
 
-    IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
+    IEnumerator PlayUrlAndWait(string url)
+    {
+        if (videoPlayer == null || string.IsNullOrEmpty(url)) yield break;
+
+        videoPlayer.Stop();
+        videoPlayer.source = VideoSource.Url;
+        videoPlayer.url = url;
+        videoPlayer.playbackSpeed = 1f;
+
+        videoPlayer.Prepare();
+        while (!videoPlayer.isPrepared) yield return null;
+
+        videoPlayer.Play();
+        while (videoPlayer.isPlaying) yield return null;
+
+        yield return null;
+    }
+
+    IEnumerator FadeCanvasGroup(CanvasGroup cg, float target, float time)
     {
         if (cg == null) yield break;
-        cg.alpha = from;
+        float start = cg.alpha;
+        if (time <= 0.0001f)
+        {
+            cg.alpha = target;
+            cg.blocksRaycasts = target > 0.001f;
+            cg.interactable = target > 0.001f;
+            yield break;
+        }
 
         float t = 0f;
-        while (t < duration)
+        while (t < time)
         {
             t += Time.unscaledDeltaTime;
-            cg.alpha = Mathf.Lerp(from, to, t / duration);
+            float p = Mathf.Clamp01(t / time);
+            cg.alpha = Mathf.Lerp(start, target, p);
             yield return null;
         }
-        cg.alpha = to;
+
+        cg.alpha = target;
+        cg.blocksRaycasts = target > 0.001f;
+        cg.interactable = target > 0.001f;
+    }
+
+    void HideCanvasGroup(CanvasGroup cg, bool instant)
+    {
+        if (cg == null) return;
+        cg.alpha = 0f;
+        cg.blocksRaycasts = false;
+        cg.interactable = false;
+    }
+
+    void ShowCanvasGroup(CanvasGroup cg, float alpha, bool instant)
+    {
+        if (cg == null) return;
+        cg.alpha = alpha;
+        cg.blocksRaycasts = alpha > 0.001f;
+        cg.interactable = alpha > 0.001f;
     }
 }

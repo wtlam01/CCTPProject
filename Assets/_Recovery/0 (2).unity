@@ -315,7 +315,6 @@ RectTransform:
   - {fileID: 1400491278}
   - {fileID: 820086337}
   - {fileID: 514806528}
-  - {fileID: 1746447786}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -493,7 +492,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -247, y: -155}
+  m_AnchoredPosition: {x: -512, y: -397.5}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &514806529
@@ -861,7 +860,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 465, y: -155}
+  m_AnchoredPosition: {x: 530, y: -408.94}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &820086338
@@ -1223,114 +1222,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564364386}
   m_CullTransparentMesh: 1
---- !u!1 &1584740078
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1584740081}
-  - component: {fileID: 1584740080}
-  - component: {fileID: 1584740082}
-  - component: {fileID: 1584740079}
-  - component: {fileID: 1584740083}
-  m_Layer: 5
-  m_Name: OrangeOverlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!225 &1584740079
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584740078}
-  m_Enabled: 1
-  m_Alpha: 0
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
-  m_IgnoreParentGroups: 0
---- !u!222 &1584740080
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584740078}
-  m_CullTransparentMesh: 1
---- !u!224 &1584740081
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584740078}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1746447786}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1820, y: 979.7007}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1584740082
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584740078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 2100000, guid: 2b53cc8b915ca4533acac76389558eac, type: 2}
-  m_Color: {r: 1, g: 0.2671497, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &1584740083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584740078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c1c237f0267348e7ae0ab060eb68793, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WipeToClearOverlay
-  overlayRect: {fileID: 1584740081}
-  overlayGraphic: {fileID: 1584740082}
-  overlayGroup: {fileID: 1584740079}
-  texSize: 512
-  brushRadiusPx: 24
-  clearToFinish: 0.55
-  disableOnFinish: 1
 --- !u!1 &1603257776
 GameObject:
   m_ObjectHideFlags: 0
@@ -1500,6 +1391,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1743448164}
+  - component: {fileID: 1743448166}
+  - component: {fileID: 1743448168}
   - component: {fileID: 1743448167}
   m_Layer: 0
   m_Name: Chapter1Manager
@@ -1523,6 +1416,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1743448166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743448162}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70ea1bcc4379c435d8f5b81321ab607d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Chapter1HubController
+  videoPlayer: {fileID: 1502551103}
+  videoRawImageObject: {fileID: 1648050913}
+  chatOptionGroup: {fileID: 1887546455}
+  studyOptionGroup: {fileID: 639274278}
+  coffeeOptionGroup: {fileID: 627594688}
+  chatButton: {fileID: 1887546456}
+  studyButton: {fileID: 639274279}
+  coffeeButton: {fileID: 627594689}
+  studyVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4
+  coffeeVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
+  sampleWindowSeconds: 0.6
+  maxPressesPerSecond: 8
+  maxPlaybackSpeed: 5
+  speedSmoothing: 10
+  stopAfterNoPressSeconds: 0.25
+  minPlaybackSpeed: 0
+  endPadding: 0.05
+  spaceHintRect: {fileID: 1156947298}
+  spaceHintGroup: {fileID: 1156947295}
+  hintShowDelay: 0.25
+  pressDownScale: 0.88
+  pressDownTime: 0.1
+  releaseTime: 0.14
+  pressPause: 0.7
+  loopDelay: 0.5
+  swipeHintObject: {fileID: 1400491273}
+  swipeHintGroup: {fileID: 1400491274}
+  swipeHintRect: {fileID: 1400491278}
+  swipeHintPosAt6s: {fileID: 820086337}
+  swipeHintPosAt10s: {fileID: 514806528}
+  swipeMinDistance: 120
+  swipeMaxTime: 0.6
+  restStop1: 6
+  restStop2: 10
 --- !u!114 &1743448167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1537,23 +1476,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1DailyHubController
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
-  bgImageObject: {fileID: 1949568320}
   chatOptionGroup: {fileID: 1887546455}
   studyOptionGroup: {fileID: 639274278}
   coffeeOptionGroup: {fileID: 627594688}
   chatButton: {fileID: 1887546456}
   studyButton: {fileID: 639274279}
   coffeeButton: {fileID: 627594689}
-  blackoutGroup: {fileID: 1603257778}
-  blackoutFadeIn: 0.35
-  blackoutHold: 0.7
-  blackoutFadeOut: 0.35
   studyVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4
-  restVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
-  overworkURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4
-  examURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4
-  successURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4
-  failureURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4
+  coffeeVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
   sampleWindowSeconds: 0.6
   maxPressesPerSecond: 8
   maxPlaybackSpeed: 5
@@ -1571,115 +1501,43 @@ MonoBehaviour:
   loopDelay: 0.5
   restStop1: 6
   restStop2: 10
-  restRepeatStart: 0
-  restRepeatEnd: 4
   swipePos6s: {fileID: 820086337}
   swipePos10s: {fileID: 514806528}
-  swipeAnim: {fileID: 1400491279}
+  swipeAnim: {fileID: 0}
   swipeMinDistance: 120
   swipeMaxTime: 0.6
+--- !u!114 &1743448168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743448162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43ddeb5c5d40e4cfa9c13a2d46b9878d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Chapter1LoopManager
   day: 1
   progress: 0
-  studyStreak: 0
-  finalDay: 15
-  passProgress: 14
-  overworkTriggerStreak: 3
-  overworkMinSkipDays: 2
-  overworkMaxSkipDays: 3
-  overworkProgressLoss: 2
-  wipeOverlay: {fileID: 1584740083}
-  orangeColor: {r: 1, g: 0.48, b: 0, a: 1}
-  orangeTriggerLastSeconds: 2
---- !u!1 &1746447785
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1746447786}
-  - component: {fileID: 1746447789}
-  - component: {fileID: 1746447788}
-  - component: {fileID: 1746447787}
-  m_Layer: 5
-  m_Name: EraseMask
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1746447786
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1746447785}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1584740081}
-  m_Father: {fileID: 114648162}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1746447787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1746447785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Mask
-  m_ShowMaskGraphic: 0
---- !u!114 &1746447788
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1746447785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1746447789
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1746447785}
-  m_CullTransparentMesh: 1
+  fatigue: 0
+  dayText: {fileID: 0}
+  warningDimGroup: {fileID: 1564364388}
+  warningDimAlpha: 0.35
+  warningFadeTime: 0.35
+  blackoutGroup: {fileID: 0}
+  blackoutFadeIn: 0.35
+  blackoutHold: 0.7
+  blackoutFadeOut: 0.35
+  warningMin: 6
+  warningMax: 8
+  overworkThreshold: 10
+  overworkSkipDays: 5
+  overworkProgressPenalty: 4
+  overworkFatigueReset: 3
+  resultOverlay: {fileID: 0}
+  resultText: {fileID: 0}
+  passProgress: 28
 --- !u!1 &1887546453
 GameObject:
   m_ObjectHideFlags: 0
@@ -1899,7 +1757,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 3656516980897171944, guid: 226919dffc05f45cda39d0579dc9ba35, type: 3}
+  m_Sprite: {fileID: 3596745050135394023, guid: facdb693e85b241b6b018fae46e3f5b0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
