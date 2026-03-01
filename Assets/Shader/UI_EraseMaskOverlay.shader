@@ -5,13 +5,13 @@ Shader "UI/EraseMaskOverlay"
         _Color("Overlay Color", Color) = (1,0.5,0,1)
         _MaskTex("Mask (R)", 2D) = "white" {}
     }
+
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType"="Transparent" "IgnoreProjector"="True" "CanUseSpriteAtlas"="True" }
+        Tags { "Queue"="Transparent" "RenderType"="Transparent" "IgnoreProjector"="True" }
         Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
         ZWrite Off
-        ZTest [unity_GUIZTestMode]
 
         Pass
         {
@@ -36,7 +36,7 @@ Shader "UI/EraseMaskOverlay"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                fixed m = tex2D(_MaskTex, i.uv).r; // 1=keep overlay, 0=erased
+                fixed m = tex2D(_MaskTex, i.uv).r; // 1=keep, 0=erased
                 fixed4 col = _Color;
                 col.a *= m;
                 return col;

@@ -1,3 +1,4 @@
+// Chapter1DailyHubController.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,21 +10,21 @@ public class Chapter1DailyHubController : MonoBehaviour
 {
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject; // RawImage GO (VideoRawImage)
+    public GameObject videoRawImageObject; // VideoRawImage GO
 
     [Header("BG (show when video hidden)")]
-    public GameObject bgImageObject;       // 拖 BG_Image (GameObject)
+    public GameObject bgImageObject;       // BG_Image GO
 
     [Header("Hub UI (CanvasGroups on each option)")]
-    public CanvasGroup chatOptionGroup;     // Option_Chat CanvasGroup (optional)
-    public CanvasGroup studyOptionGroup;    // Option_Study CanvasGroup
-    public CanvasGroup coffeeOptionGroup;   // Option_Coffee CanvasGroup (Rest)
+    public CanvasGroup chatOptionGroup;
+    public CanvasGroup studyOptionGroup;
+    public CanvasGroup coffeeOptionGroup;
     public Button chatButton;
     public Button studyButton;
     public Button coffeeButton;
 
     [Header("System Overlay (optional)")]
-    public CanvasGroup blackoutGroup;       // BlackFadeOverlay CanvasGroup (optional)
+    public CanvasGroup blackoutGroup;
     public float blackoutFadeIn = 0.35f;
     public float blackoutHold = 0.7f;
     public float blackoutFadeOut = 0.35f;
@@ -46,8 +47,8 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float endPadding = 0.05f;
 
     [Header("Space Hint (press demo)")]
-    public RectTransform spaceHintRect;     // SpaceHint rect
-    public CanvasGroup spaceHintGroup;      // SpaceHint canvas group
+    public RectTransform spaceHintRect;
+    public CanvasGroup spaceHintGroup;
     public float hintShowDelay = 0.25f;
 
     [Header("Space Hint Animation")]
@@ -66,9 +67,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     public double restRepeatEnd = 4.0;
 
     [Header("Swipe Hint (Rest stops)")]
-    public RectTransform swipePos6s;             // SwipeHintPos_6s
-    public RectTransform swipePos10s;            // SwipeHintPos_10s
-    public SwipeHintAnimator_Chapter1 swipeAnim; // FingerHint(Image) 上嘅 SwipeHintAnimator_Chapter1
+    public RectTransform swipePos6s;
+    public RectTransform swipePos10s;
+    public SwipeHintAnimator_Chapter1 swipeAnim;
     public float swipeMinDistance = 120f;
     public float swipeMaxTime = 0.6f;
 
@@ -79,18 +80,18 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     [Header("Targets")]
     public int finalDay = 15;
-    public int passProgress = 18; // SUCCESS threshold
+    public int passProgress = 18;
 
     [Header("Overwork (trigger by streak)")]
-    public int overworkTriggerStreak = 3;   // studyStreak >= 3 triggers
-    public int overworkMinSkipDays = 2;     // random skip +2 or +3
+    public int overworkTriggerStreak = 3;
+    public int overworkMinSkipDays = 2;
     public int overworkMaxSkipDays = 3;
-    public int overworkProgressLoss = 2;    // progress -2
+    public int overworkProgressLoss = 2;
 
-    [Header("Overwork wipe-to-clean overlay")]
-    public WipeToClearOverlay wipeOverlay; // 拖 OrangeOverlay 上嘅 WipeToClearOverlay component
-    public Color orangeColor = new Color(1f, 0.5f, 0f, 1f);
-    public float orangeTriggerLastSeconds = 2f; // 火片尾前幾秒開始
+    [Header("Overwork: wipe-to-clean overlay")]
+    public WipeToClearOverlay wipeOverlay; // drag OrangeOverlay (with WipeToClearOverlay)
+    public float orangeTriggerLastSeconds = 2.0f; // last N seconds show overlay trigger moment
+    [Range(0.1f, 0.99f)] public float nearlyCleanThreshold = 0.80f; // target 80%
 
     // runtime state
     bool isPlaying = false;
@@ -101,11 +102,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     // study press tracking
     readonly Queue<float> pressTimes = new Queue<float>();
     float lastPressAt = -999f;
-
-    // hint coroutine
     Coroutine spaceHintCo;
 
-    // swipe state (rest stops)
+    // rest swipe state
     bool waitingSwipe = false;
     Vector2 swipeStartPos;
     float swipeStartTime;
@@ -127,19 +126,19 @@ public class Chapter1DailyHubController : MonoBehaviour
 
         if (studyButton != null)
         {
-            studyButton.onClick.RemoveListener(OnStudyClicked);
+            studyButton.onClick.RemoveAllListeners();
             studyButton.onClick.AddListener(OnStudyClicked);
         }
 
         if (coffeeButton != null)
         {
-            coffeeButton.onClick.RemoveListener(OnRestClicked);
+            coffeeButton.onClick.RemoveAllListeners();
             coffeeButton.onClick.AddListener(OnRestClicked);
         }
 
         if (chatButton != null)
         {
-            chatButton.onClick.RemoveListener(OnChatClicked);
+            chatButton.onClick.RemoveAllListeners();
             chatButton.onClick.AddListener(OnChatClicked);
         }
 
@@ -147,21 +146,26 @@ public class Chapter1DailyHubController : MonoBehaviour
         coffeeUnlocked = false;
         restTimesChosen = 0;
 
-        // Rest hidden at start
         SetOption(coffeeOptionGroup, coffeeButton, show: false, disableGO: true);
         ApplyHubState(showHub: true);
 
-        // hints
         SetSpaceHintVisible(false);
         StopSpaceHintLoop();
+
         if (swipeAnim != null) swipeAnim.StopAndHide();
 
-        // blackout
         if (blackoutGroup != null)
         {
             blackoutGroup.alpha = 0f;
             blackoutGroup.blocksRaycasts = false;
             blackoutGroup.interactable = false;
+        }
+
+        if (wipeOverlay != null)
+        {
+            wipeOverlay.EndWipeHide();
+            wipeOverlay.OnFinished -= OnOrangeWipeFinished;
+            wipeOverlay.OnFinished += OnOrangeWipeFinished;
         }
     }
 
@@ -169,7 +173,6 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (!waitingSwipe) return;
 
-        // backup test
         if (Keyboard.current != null && Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             swipeTriggered = true;
@@ -195,6 +198,27 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
+    // called by wipe overlay event
+    void OnOrangeWipeFinished()
+    {
+        // ensure BG only
+        if (videoPlayer != null) videoPlayer.Stop();
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        if (bgImageObject != null) bgImageObject.SetActive(true);
+
+        // unlock hub immediately
+        ApplyHubState(showHub: true);
+        isPlaying = false;
+
+        // optional: release blackout
+        if (blackoutGroup != null)
+        {
+            blackoutGroup.alpha = 0f;
+            blackoutGroup.blocksRaycasts = false;
+            blackoutGroup.interactable = false;
+        }
+    }
+
     // -------------------- UI Actions --------------------
     void OnStudyClicked()
     {
@@ -216,8 +240,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        // 暫時當 Rest（如果未解鎖 Rest，就當 Study）
         chatLocked = true;
+
+        // 暫時：當 Rest；如果未解鎖 Rest，就當 Study
         if (coffeeUnlocked) StartCoroutine(RestDayRoutine());
         else StartCoroutine(StudyDayRoutine());
     }
@@ -228,19 +253,15 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        // Hidden rules
         day += 1;
         progress += 2;
         studyStreak += 1;
 
-        // video
         yield return PlayStudyWithSpace(studyVideoURL);
 
-        // unlock Rest after first Study completes
         coffeeUnlocked = true;
         SetOption(coffeeOptionGroup, coffeeButton, show: true, disableGO: false);
 
-        // system check
         yield return SystemCheckRoutine();
 
         if (!isPlaying) yield break;
@@ -253,7 +274,6 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        // Hidden rules
         day += 1;
         studyStreak = 0;
 
@@ -274,7 +294,6 @@ public class Chapter1DailyHubController : MonoBehaviour
     // -------------------- System Check --------------------
     IEnumerator SystemCheckRoutine()
     {
-        // Final => exam + result
         if (day >= finalDay)
         {
             day = finalDay;
@@ -289,15 +308,16 @@ public class Chapter1DailyHubController : MonoBehaviour
             yield break;
         }
 
-        // Overwork by streak
         if (studyStreak >= overworkTriggerStreak)
         {
             yield return BlackoutRoutine(true);
 
-            // Fire video -> last seconds -> wipe-to-clean overlay
             yield return PlayOverworkFireThenWipe(overworkURL);
 
-            // punishment AFTER wipe finished
+            // if wipe finished, OnOrangeWipeFinished already set isPlaying=false and hub shown.
+            // stop the rest of this system routine.
+            if (!isPlaying) yield break;
+
             int skip = Random.Range(overworkMinSkipDays, overworkMaxSkipDays + 1);
             day += skip;
 
@@ -318,10 +338,11 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
-    // -------------------- Overwork Fire -> Wipe-to-clean --------------------
+    // -------------------- Overwork: last seconds -> pause -> BG only -> wipe -> return hub --------------------
     IEnumerator PlayOverworkFireThenWipe(string url)
     {
-        // 1) Play fire video
+        if (wipeOverlay != null) wipeOverlay.EndWipeHide();
+
         yield return PrepareVideo(url);
         ShowVideo(true);
         if (bgImageObject != null) bgImageObject.SetActive(false);
@@ -330,31 +351,33 @@ public class Chapter1DailyHubController : MonoBehaviour
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.Play();
 
-        // 2) Wait until near end
         double len = videoPlayer.length;
-        if (len <= 0.01) len = 8.0; // fallback
+        if (len <= 0.01) len = 8.0;
 
-        double triggerAt = Mathf.Max(0f, (float)len - orangeTriggerLastSeconds);
+        double showAt = Mathf.Max(0f, (float)len - orangeTriggerLastSeconds);
 
-        while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < triggerAt)
+        // wait until last N seconds
+        while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < showAt)
             yield return null;
 
-        // 3) Cut to BG and start wipe (solid orange)
+        // ✅ freeze video + switch to BG immediately (wipe background = BG only)
         if (videoPlayer != null) videoPlayer.Pause();
-        ShowVideo(false);
-
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
+        // ✅ begin wiping now
         if (wipeOverlay != null)
         {
-            wipeOverlay.StartWipe(orangeColor);
-            yield return new WaitUntil(() => wipeOverlay.Finished);
+            wipeOverlay.clearToFinish = nearlyCleanThreshold; // 0.80
+            wipeOverlay.BeginWipe();
         }
-        else
-        {
-            // If you forgot to assign wipeOverlay, just wait a moment so flow doesn't break
-            yield return new WaitForSecondsRealtime(0.5f);
-        }
+
+        // ✅ wait until wipe overlay completes (event will fire)
+        while (wipeOverlay != null && wipeOverlay.gameObject.activeInHierarchy)
+            yield return null;
+
+        // OnOrangeWipeFinished() handles hub + flags
+        yield break;
     }
 
     // -------------------- Blackout --------------------
@@ -520,16 +543,13 @@ public class Chapter1DailyHubController : MonoBehaviour
         videoPlayer.time = 0;
         videoPlayer.Play();
 
-        // stop 6s
         yield return PlayUntilTime(stop1);
         yield return WaitForSwipeAtPos(swipePos6s);
 
-        // stop 10s
         videoPlayer.Play();
         yield return PlayUntilTime(stop2);
         yield return WaitForSwipeAtPos(swipePos10s);
 
-        // to end
         videoPlayer.Play();
         while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
 
