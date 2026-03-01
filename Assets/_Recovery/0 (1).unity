@@ -1423,7 +1423,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1743448162}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 70ea1bcc4379c435d8f5b81321ab607d, type: 3}
   m_Name: 
@@ -1474,36 +1474,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95811fa2ad4b54d8bbe2d11ba99ce82f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1DailyHubController
+  loopManager: {fileID: 0}
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
-  chatOptionGroup: {fileID: 1887546455}
-  studyOptionGroup: {fileID: 639274278}
-  coffeeOptionGroup: {fileID: 627594688}
-  chatButton: {fileID: 1887546456}
+  studyGroup: {fileID: 639274278}
+  coffeeGroup: {fileID: 627594688}
+  playGroup: {fileID: 0}
   studyButton: {fileID: 639274279}
   coffeeButton: {fileID: 627594689}
+  playButton: {fileID: 0}
   studyVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4
-  coffeeVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
+  restVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
+  playVideoURL: 
   sampleWindowSeconds: 0.6
   maxPressesPerSecond: 8
   maxPlaybackSpeed: 5
   speedSmoothing: 10
   stopAfterNoPressSeconds: 0.25
-  minPlaybackSpeed: 0
   endPadding: 0.05
   spaceHintRect: {fileID: 1156947298}
   spaceHintGroup: {fileID: 1156947295}
   hintShowDelay: 0.25
-  pressDownScale: 0.88
-  pressDownTime: 0.1
-  releaseTime: 0.14
-  pressPause: 0.7
-  loopDelay: 0.5
   restStop1: 6
   restStop2: 10
   swipePos6s: {fileID: 820086337}
   swipePos10s: {fileID: 514806528}
-  swipeAnim: {fileID: 0}
+  swipeAnim: {fileID: 1400491279}
   swipeMinDistance: 120
   swipeMaxTime: 0.6
 --- !u!114 &1743448168

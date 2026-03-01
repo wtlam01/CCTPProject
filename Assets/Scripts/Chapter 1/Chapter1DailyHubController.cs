@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -6,84 +7,130 @@ using UnityEngine.InputSystem;
 
 public class Chapter1DailyHubController : MonoBehaviour
 {
-    [Header("Loop Manager")]
-    public Chapter1LoopManager loopManager;
-
-    [Header("Video")]
+    [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;
+    public GameObject videoRawImageObject; // RawImage GO (VideoRawImage)
 
-    [Header("Options (CanvasGroups + Buttons)")]
-    public CanvasGroup studyGroup;
-    public CanvasGroup coffeeGroup;
-    public CanvasGroup playGroup;
-
+    [Header("Hub UI (CanvasGroups on each option)")]
+    public CanvasGroup chatOptionGroup;     // Option_Chat CanvasGroup
+    public CanvasGroup studyOptionGroup;    // Option_Study CanvasGroup
+    public CanvasGroup coffeeOptionGroup;   // Option_Coffee CanvasGroup
+    public Button chatButton;
     public Button studyButton;
     public Button coffeeButton;
-    public Button playButton;
 
     [Header("URLs")]
-    public string studyVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4";
-    public string restVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4";
-    public string playVideoURL  = ""; // optional
+    public string studyVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4";
+    public string coffeeVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4";
 
     [Header("Study: press rate -> playbackSpeed")]
-    public float sampleWindowSeconds = 0.6f;
-    public float maxPressesPerSecond = 8f;
-    public float maxPlaybackSpeed = 5f;
-    public float speedSmoothing = 10f;
-    public float stopAfterNoPressSeconds = 0.25f;
-    public float endPadding = 0.05f;
+    public float sampleWindowSeconds = 0.6f;     // count presses within this window
+    public float maxPressesPerSecond = 8f;       // this APS reaches max speed
+    public float maxPlaybackSpeed = 5f;          // speed when APS hits maxPressesPerSecond
+    public float speedSmoothing = 10f;           // higher = snappier
+    public float stopAfterNoPressSeconds = 0.25f;// no press => stop
+    public float minPlaybackSpeed = 0f;          // 0 = fully stop
+    public float endPadding = 0.05f;             // close-to-end threshold
 
-    [Header("Space Hint")]
-    public RectTransform spaceHintRect;
-    public CanvasGroup spaceHintGroup;
+    [Header("Space Hint (press demo)")]
+    public RectTransform spaceHintRect;  // SpaceHint rect
+    public CanvasGroup spaceHintGroup;   // SpaceHint canvas group
     public float hintShowDelay = 0.25f;
+
+    [Header("Space Hint Animation")]
+    public float pressDownScale = 0.88f;
+    public float pressDownTime = 0.10f;
+    public float releaseTime = 0.14f;
+    public float pressPause = 0.70f;   // ✅ 你話想「相隔耐d」：加大呢個
+    public float loopDelay = 0.50f;    // ✅ 同樣可以加大
 
     [Header("Rest: swipe stops")]
     public double restStop1 = 6.0;
     public double restStop2 = 10.0;
 
     [Header("Swipe Hint (Chapter1 only)")]
-    public RectTransform swipePos6s;
-    public RectTransform swipePos10s;
-    public SwipeHintAnimator_Chapter1 swipeAnim;
+    public RectTransform swipePos6s;             // SwipeHintPos_6s (RectTransform)
+    public RectTransform swipePos10s;            // SwipeHintPos_10s (RectTransform)
+    public SwipeHintAnimator swipeAnim;          // FingerHint(Image) 上嘅 SwipeHintAnimator
+    public float swipeMinDistance = 120f;        // px
+    public float swipeMaxTime = 0.6f;            // seconds
 
-    bool isPlaying;
-    readonly System.Collections.Generic.Queue<float> pressTimes = new System.Collections.Generic.Queue<float>();
+    bool isPlaying = false;
+
+    bool chatLocked = false;
+    bool coffeeUnlocked = false;
+    bool coffeeFirstTimeSwipeStops = true;
+
+    // study press tracking
+    readonly Queue<float> pressTimes = new Queue<float>();
     float lastPressAt = -999f;
-    Coroutine hintCo;
 
-    // swipe detect
-    bool waitSwipe;
-    bool swipeTriggered;
+    // hint coroutine
+    Coroutine spaceHintCo;
+
+    // swipe state
+    bool waitingSwipe = false;
     Vector2 swipeStartPos;
     float swipeStartTime;
-    public float swipeMinDistance = 120f;
-    public float swipeMaxTime = 0.6f;
+    bool swipeTriggered = false;
 
     void Awake()
     {
+        // Video defaults
         if (videoPlayer != null)
         {
             videoPlayer.playOnAwake = false;
             videoPlayer.waitForFirstFrame = true;
             videoPlayer.isLooping = false;
+            videoPlayer.playbackSpeed = 1f;
+            videoPlayer.Stop();
         }
 
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
-        SetSpaceHint(false);
 
-        if (studyButton != null) studyButton.onClick.AddListener(OnStudy);
-        if (coffeeButton != null) coffeeButton.onClick.AddListener(OnRest);
-        if (playButton != null) playButton.onClick.AddListener(OnPlay);
+        // Button listeners
+        if (studyButton != null)
+        {
+            studyButton.onClick.RemoveListener(OnStudyClicked);
+            studyButton.onClick.AddListener(OnStudyClicked);
+        }
 
-        ShowHub(true);
+        if (coffeeButton != null)
+        {
+            coffeeButton.onClick.RemoveListener(OnCoffeeClicked);
+            coffeeButton.onClick.AddListener(OnCoffeeClicked);
+        }
+
+        // Initial state:
+        chatLocked = false;
+        coffeeUnlocked = false;
+        coffeeFirstTimeSwipeStops = true;
+
+        // Hard-hide coffee at start (no “appear at beginning”)
+        SetOption(coffeeOptionGroup, coffeeButton, show:false, disableGO:true);
+
+        // Show hub (Chat + Study only)
+        ApplyHubState(showHub:true);
+
+        // Hide hints
+        SetSpaceHintVisible(false);
+        StopSpaceHintLoop();
+
+        if (swipeAnim != null) swipeAnim.StopAndHide();
     }
 
     void Update()
     {
-        if (!waitSwipe) return;
+        // swipe detection only while waiting
+        if (!waitingSwipe) return;
+
+        // allow keyboard UpArrow as backup test
+        if (Keyboard.current != null && Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            swipeTriggered = true;
+            return;
+        }
+
         if (Pointer.current == null) return;
 
         if (Pointer.current.press.wasPressedThisFrame)
@@ -101,37 +148,37 @@ public class Chapter1DailyHubController : MonoBehaviour
             if (dt <= swipeMaxTime && dy >= swipeMinDistance)
             {
                 swipeTriggered = true;
-                waitSwipe = false;
-                if (swipeAnim != null) swipeAnim.StopAndHide();
             }
         }
     }
 
-    void OnStudy()
+    // -------------------- UI Actions --------------------
+    void OnStudyClicked()
     {
         if (isPlaying) return;
-        if (loopManager != null && loopManager.IsBusy) return;
-        StartCoroutine(StudyRoutine());
+
+        chatLocked = true; // after first real choice, chat disappears forever
+        StartCoroutine(PlayStudyRoutine());
     }
 
-    void OnRest()
+    void OnCoffeeClicked()
     {
         if (isPlaying) return;
-        if (loopManager != null && loopManager.IsBusy) return;
-        StartCoroutine(RestRoutine());
+        if (!coffeeUnlocked) return;
+
+        chatLocked = true;
+
+        if (coffeeFirstTimeSwipeStops)
+            StartCoroutine(PlayCoffeeSwipeStopsRoutine());
+        else
+            StartCoroutine(PlayCoffeeSimpleRoutine());
     }
 
-    void OnPlay()
-    {
-        if (isPlaying) return;
-        if (loopManager != null && loopManager.IsBusy) return;
-        StartCoroutine(PlayRoutine());
-    }
-
-    IEnumerator StudyRoutine()
+    // -------------------- Study Routine --------------------
+    IEnumerator PlayStudyRoutine()
     {
         isPlaying = true;
-        ShowHub(false);
+        ApplyHubState(showHub:false);
 
         yield return PrepareVideo(studyVideoURL);
         ShowVideo(true);
@@ -139,12 +186,14 @@ public class Chapter1DailyHubController : MonoBehaviour
         pressTimes.Clear();
         lastPressAt = Time.unscaledTime;
 
+        // Start frozen until presses
         videoPlayer.time = 0;
         videoPlayer.playbackSpeed = 0f;
         videoPlayer.Play();
 
+        // show hint after delay, until first press
         yield return new WaitForSecondsRealtime(hintShowDelay);
-        StartHintLoop();
+        StartSpaceHintLoop();
 
         double duration = videoPlayer.length;
         if (duration <= 0.01) duration = 12.0;
@@ -154,7 +203,9 @@ public class Chapter1DailyHubController : MonoBehaviour
 
         while (videoPlayer.time < duration - endPadding)
         {
-            bool pressed = (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame);
+            bool pressed =
+                (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame);
+
             if (pressed)
             {
                 pressTimes.Enqueue(Time.unscaledTime);
@@ -163,18 +214,19 @@ public class Chapter1DailyHubController : MonoBehaviour
                 if (!firstPress)
                 {
                     firstPress = true;
-                    StopHintLoop();
-                    SetSpaceHint(false);
+                    StopSpaceHintLoop();
+                    SetSpaceHintVisible(false);
                 }
             }
 
             while (pressTimes.Count > 0 && Time.unscaledTime - pressTimes.Peek() > sampleWindowSeconds)
                 pressTimes.Dequeue();
 
-            float aps = pressTimes.Count / Mathf.Max(0.0001f, sampleWindowSeconds);
+            float aps = (sampleWindowSeconds > 0.0001f) ? (pressTimes.Count / sampleWindowSeconds) : 0f;
             float t = Mathf.Clamp01(aps / maxPressesPerSecond);
-            float targetSpeed = Mathf.Lerp(0f, maxPlaybackSpeed, t);
+            float targetSpeed = Mathf.Lerp(minPlaybackSpeed, maxPlaybackSpeed, t);
 
+            // if no press recently -> stop
             if (Time.unscaledTime - lastPressAt > stopAfterNoPressSeconds)
                 targetSpeed = 0f;
 
@@ -182,134 +234,197 @@ public class Chapter1DailyHubController : MonoBehaviour
             currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, lerpFactor);
 
             videoPlayer.playbackSpeed = currentSpeed;
+
             yield return null;
         }
 
+        // finish
         videoPlayer.playbackSpeed = 1f;
-        StopHintLoop();
-        SetSpaceHint(false);
+        StopSpaceHintLoop();
+        SetSpaceHintVisible(false);
 
         ShowVideo(false);
 
-        // ✅ apply day stats AFTER action finished
-        if (loopManager != null) loopManager.ApplyStudy();
+        // unlock coffee after first Study completes
+        coffeeUnlocked = true;
 
-        ShowHub(true);
+        ApplyHubState(showHub:true);
         isPlaying = false;
     }
 
-    IEnumerator RestRoutine()
+    // -------------------- Coffee (Rest) Routine with Swipe Stops --------------------
+    IEnumerator PlayCoffeeSwipeStopsRoutine()
     {
         isPlaying = true;
-        ShowHub(false);
+        ApplyHubState(showHub:false);
 
-        yield return PrepareVideo(restVideoURL);
+        yield return PrepareVideo(coffeeVideoURL);
         ShowVideo(true);
 
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.time = 0;
         videoPlayer.Play();
 
-        // play to 6s
-        yield return PlayUntil(restStop1);
-        yield return WaitSwipeAt(swipePos6s);
+        // play to 6s then pause
+        yield return PlayUntilTime(restStop1);
+        yield return WaitForSwipeAtPos(swipePos6s);
 
-        // play to 10s
+        // play to 10s then pause
         videoPlayer.Play();
-        yield return PlayUntil(restStop2);
-        yield return WaitSwipeAt(swipePos10s);
+        yield return PlayUntilTime(restStop2);
+        yield return WaitForSwipeAtPos(swipePos10s);
 
         // play to end
         videoPlayer.Play();
-        while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
+        while (videoPlayer != null && videoPlayer.isPlaying)
+            yield return null;
 
         ShowVideo(false);
 
-        if (loopManager != null) loopManager.ApplyRest();
+        coffeeFirstTimeSwipeStops = false; // next time, no stops (optional)
 
-        ShowHub(true);
+        ApplyHubState(showHub:true);
         isPlaying = false;
     }
 
-    IEnumerator PlayRoutine()
+    // If you want later coffee clicks play normally (no swipe stops)
+    IEnumerator PlayCoffeeSimpleRoutine()
     {
         isPlaying = true;
-        ShowHub(false);
+        ApplyHubState(showHub:false);
 
-        if (!string.IsNullOrEmpty(playVideoURL))
-        {
-            yield return PrepareVideo(playVideoURL);
-            ShowVideo(true);
-            videoPlayer.time = 0;
-            videoPlayer.playbackSpeed = 1f;
-            videoPlayer.Play();
-            while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
-            ShowVideo(false);
-        }
+        yield return PrepareVideo(coffeeVideoURL);
+        ShowVideo(true);
 
-        if (loopManager != null) loopManager.ApplyPlayAvoid();
+        videoPlayer.playbackSpeed = 1f;
+        videoPlayer.time = 0;
+        videoPlayer.Play();
 
-        ShowHub(true);
+        while (videoPlayer != null && videoPlayer.isPlaying)
+            yield return null;
+
+        ShowVideo(false);
+        ApplyHubState(showHub:true);
         isPlaying = false;
     }
 
-    IEnumerator PrepareVideo(string url)
+    IEnumerator PlayUntilTime(double stopTime)
     {
-        videoPlayer.Stop();
-        videoPlayer.url = url;
-        videoPlayer.Prepare();
-        while (!videoPlayer.isPrepared) yield return null;
-    }
+        if (videoPlayer == null) yield break;
 
-    IEnumerator PlayUntil(double stopTime)
-    {
-        while (videoPlayer.time < stopTime) yield return null;
+        while (videoPlayer.time < stopTime)
+            yield return null;
+
         videoPlayer.Pause();
     }
 
-    IEnumerator WaitSwipeAt(RectTransform pos)
+    IEnumerator WaitForSwipeAtPos(RectTransform pos)
     {
         swipeTriggered = false;
-        waitSwipe = true;
+        waitingSwipe = true;
 
+        // pause while waiting
         if (videoPlayer != null) videoPlayer.Pause();
 
+        // show finger hint at desired position
         if (swipeAnim != null)
         {
-            swipeAnim.SetBaseFrom(pos);
+            if (pos != null)
+                swipeAnim.transform.position = pos.position; // world position
             swipeAnim.ShowAndPlay();
         }
 
-        while (!swipeTriggered) yield return null;
+        while (!swipeTriggered)
+            yield return null;
+
+        waitingSwipe = false;
+
+        if (swipeAnim != null) swipeAnim.StopAndHide();
+
+        yield return null;
+    }
+
+    // -------------------- Video Helpers --------------------
+    IEnumerator PrepareVideo(string url)
+    {
+        if (videoPlayer == null) yield break;
+
+        videoPlayer.Stop();
+        videoPlayer.url = url;
+        videoPlayer.Prepare();
+        while (!videoPlayer.isPrepared)
+            yield return null;
     }
 
     void ShowVideo(bool show)
     {
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(show);
-        if (!show && videoPlayer != null) videoPlayer.Stop();
+        if (show)
+        {
+            if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
+        }
+        else
+        {
+            if (videoPlayer != null) videoPlayer.Stop();
+            if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        }
     }
 
-    void ShowHub(bool show)
+    // -------------------- Hub UI State --------------------
+    void ApplyHubState(bool showHub)
     {
-        SetOption(studyGroup, studyButton, show);
-        SetOption(coffeeGroup, coffeeButton, show);
-        SetOption(playGroup, playButton, show);
+        if (!showHub)
+        {
+            SetOption(chatOptionGroup, chatButton, show:false, disableGO:true);
+            SetOption(studyOptionGroup, studyButton, show:false, disableGO:true);
+            SetOption(coffeeOptionGroup, coffeeButton, show:false, disableGO:true);
+            return;
+        }
+
+        // chat: only before first choice
+        if (!chatLocked)
+            SetOption(chatOptionGroup, chatButton, show:true, disableGO:false);
+        else
+            SetOption(chatOptionGroup, chatButton, show:false, disableGO:true);
+
+        // study always available
+        SetOption(studyOptionGroup, studyButton, show:true, disableGO:false);
+
+        // coffee only after unlocked
+        if (coffeeUnlocked)
+            SetOption(coffeeOptionGroup, coffeeButton, show:true, disableGO:false);
+        else
+            SetOption(coffeeOptionGroup, coffeeButton, show:false, disableGO:true);
     }
 
-    void SetOption(CanvasGroup g, Button b, bool show)
+    void SetOption(CanvasGroup g, Button b, bool show, bool disableGO)
     {
         if (g == null) return;
-        g.gameObject.SetActive(show);
-        g.alpha = show ? 1f : 0f;
-        g.blocksRaycasts = show;
-        g.interactable = show;
+
+        if (show)
+        {
+            if (!g.gameObject.activeSelf) g.gameObject.SetActive(true);
+            g.alpha = 1f;
+            g.interactable = true;
+            g.blocksRaycasts = true;
+        }
+        else
+        {
+            g.alpha = 0f;
+            g.interactable = false;
+            g.blocksRaycasts = false;
+
+            if (disableGO && g.gameObject.activeSelf)
+                g.gameObject.SetActive(false);
+        }
+
         if (b != null) b.interactable = show;
     }
 
-    // ---------- Space Hint ----------
-    void SetSpaceHint(bool show)
+    // -------------------- Space Hint --------------------
+    void SetSpaceHintVisible(bool show)
     {
         if (spaceHintRect != null) spaceHintRect.gameObject.SetActive(show);
+
         if (spaceHintGroup != null)
         {
             spaceHintGroup.alpha = show ? 1f : 0f;
@@ -318,49 +433,54 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
-    void StartHintLoop()
+    void StartSpaceHintLoop()
     {
         if (spaceHintRect == null) return;
-        SetSpaceHint(true);
-        if (hintCo != null) StopCoroutine(hintCo);
-        hintCo = StartCoroutine(HintLoop());
+
+        SetSpaceHintVisible(true);
+
+        if (spaceHintCo != null) StopCoroutine(spaceHintCo);
+        spaceHintCo = StartCoroutine(SpaceHintLoop());
     }
 
-    void StopHintLoop()
+    void StopSpaceHintLoop()
     {
-        if (hintCo != null) StopCoroutine(hintCo);
-        hintCo = null;
+        if (spaceHintCo != null) StopCoroutine(spaceHintCo);
+        spaceHintCo = null;
+
         if (spaceHintRect != null) spaceHintRect.localScale = Vector3.one;
     }
 
-    IEnumerator HintLoop()
+    IEnumerator SpaceHintLoop()
     {
         Vector3 baseScale = Vector3.one;
-        Vector3 down = baseScale * 0.88f;
+        Vector3 downScale = baseScale * pressDownScale;
 
         while (true)
         {
             // press down
             float t = 0f;
-            while (t < 0.10f)
+            while (t < pressDownTime)
             {
                 t += Time.unscaledDeltaTime;
-                spaceHintRect.localScale = Vector3.Lerp(baseScale, down, t / 0.10f);
+                spaceHintRect.localScale = Vector3.Lerp(baseScale, downScale, t / pressDownTime);
                 yield return null;
             }
+            spaceHintRect.localScale = downScale;
 
             // release
             t = 0f;
-            while (t < 0.14f)
+            while (t < releaseTime)
             {
                 t += Time.unscaledDeltaTime;
-                spaceHintRect.localScale = Vector3.Lerp(down, baseScale, t / 0.14f);
+                spaceHintRect.localScale = Vector3.Lerp(downScale, baseScale, t / releaseTime);
                 yield return null;
             }
+            spaceHintRect.localScale = baseScale;
 
-            // ✅ “相隔耐啲” 就加呢兩個
-            yield return new WaitForSecondsRealtime(0.70f); // pressPause
-            yield return new WaitForSecondsRealtime(0.50f); // loopDelay
+            // ✅ “相隔耐d” 就調大 pressPause / loopDelay
+            yield return new WaitForSecondsRealtime(pressPause);
+            yield return new WaitForSecondsRealtime(loopDelay);
         }
     }
 }
