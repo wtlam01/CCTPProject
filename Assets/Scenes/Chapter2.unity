@@ -394,6 +394,7 @@ RectTransform:
   - {fileID: 665585602}
   - {fileID: 1470072823}
   - {fileID: 1619864101}
+  - {fileID: 2089955267}
   - {fileID: 2119913314}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1446,8 +1447,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ff84ce130d3e44e728bfd4c407cc9b26, type: 2}
+  m_sharedMaterial: {fileID: -405493681411549921, guid: ff84ce130d3e44e728bfd4c407cc9b26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2287,8 +2288,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u200B"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ff84ce130d3e44e728bfd4c407cc9b26, type: 2}
+  m_sharedMaterial: {fileID: -405493681411549921, guid: ff84ce130d3e44e728bfd4c407cc9b26, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2378,6 +2379,7 @@ GameObject:
   - component: {fileID: 1470072821}
   - component: {fileID: 1470072824}
   - component: {fileID: 1470072825}
+  - component: {fileID: 1470072826}
   m_Layer: 5
   m_Name: EmailButton
   m_TagString: Untagged
@@ -2512,6 +2514,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EmailHoverScale
   hoverScale: 1.1
   speed: 10
+--- !u!225 &1470072826
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1470072820}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &1562664456
 GameObject:
   m_ObjectHideFlags: 0
@@ -2643,9 +2657,9 @@ MonoBehaviour:
   doNothingStartAtSeconds: 2
   emailButtonObject: {fileID: 1470072820}
   emailButton: {fileID: 1470072824}
+  emailButtonCanvasGroup: {fileID: 1470072826}
   emailButtonDelayOnSofa: 0.6
   emailButtonFadeInDuration: 0.8
-  emailButtonCanvasGroup: {fileID: 0}
   emailButtonRect: {fileID: 1619864101}
   hoverScale: 1.12
   hoverScaleSpeed: 12
@@ -2654,8 +2668,13 @@ MonoBehaviour:
   requireDragDown: 1
   requireLeftMouseHeld: 1
   fingerHintDown: {fileID: 1619864102}
-  emailsToTriggerEnding: 3
-  afterThirdBackToSofaHideSeconds: 2
+  minChecksToShowDoor: 3
+  exitDoorButtonObject: {fileID: 2089955266}
+  exitDoorButton: {fileID: 2089955269}
+  exitDoorCanvasGroup: {fileID: 2089955272}
+  syncDoorWithEmailButton: 1
+  showDoorOnlyAfterMinChecks: 1
+  afterDoorPressedHoldOnSofaSeconds: 0
   fadeOutLastSeconds: 3
   endScreenPanel: {fileID: 2119913313}
   endScreenText: {fileID: 0}
@@ -2778,6 +2797,7 @@ GameObject:
   - component: {fileID: 1666140577}
   - component: {fileID: 1666140580}
   - component: {fileID: 1666140578}
+  - component: {fileID: 1666140581}
   m_Layer: 5
   m_Name: EmailGroup
   m_TagString: Untagged
@@ -2847,6 +2867,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1666140576}
   m_CullTransparentMesh: 1
+--- !u!225 &1666140581
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1666140576}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &1691372892
 GameObject:
   m_ObjectHideFlags: 0
@@ -3120,6 +3152,172 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1793488426}
   m_CullTransparentMesh: 1
+--- !u!1 &2089955266
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2089955267}
+  - component: {fileID: 2089955271}
+  - component: {fileID: 2089955270}
+  - component: {fileID: 2089955269}
+  - component: {fileID: 2089955268}
+  - component: {fileID: 2089955272}
+  m_Layer: 5
+  m_Name: DoorButton1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &2089955267
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 114648162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -1643, y: 42}
+  m_SizeDelta: {x: 178, y: 280}
+  m_Pivot: {x: 1, y: 0}
+--- !u!114 &2089955268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfca1c03a3079483a93ab43397534cf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ExitDoorController
+  doorClosedSprite: {fileID: 5213229242370633579, guid: 93984225534904ed2b15589dddc4950f, type: 3}
+  doorOpenSprite: {fileID: 4856990145134343996, guid: 644cd77d4d07248a7813c325aa4e7f79, type: 3}
+  doorImage: {fileID: 2089955270}
+  doorCanvasGroup: {fileID: 2089955272}
+  emailGroupToHide: {fileID: 1666140576}
+  hideOnClick: {fileID: 0}
+  sofaEmailController: {fileID: 1562664462}
+  openHoldSeconds: 0.15
+--- !u!114 &2089955269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 2089955270}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2089955268}
+        m_TargetAssemblyTypeName: ExitDoorController, Assembly-CSharp
+        m_MethodName: OnExitDoorClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2089955270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 5213229242370633579, guid: 93984225534904ed2b15589dddc4950f, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &2089955271
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_CullTransparentMesh: 1
+--- !u!225 &2089955272
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2089955266}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &2119913313
 GameObject:
   m_ObjectHideFlags: 0
