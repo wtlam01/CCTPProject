@@ -387,8 +387,8 @@ RectTransform:
   - {fileID: 1327239343}
   - {fileID: 299094431}
   - {fileID: 530251922}
-  - {fileID: 1793488427}
   - {fileID: 1285585904}
+  - {fileID: 1793488427}
   - {fileID: 1425069265}
   - {fileID: 1666140577}
   - {fileID: 665585602}
@@ -3082,7 +3082,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1793488427
 RectTransform:
   m_ObjectHideFlags: 0
