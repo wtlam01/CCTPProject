@@ -1,19 +1,24 @@
-// Chapter1DailyHubController.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Chapter1DailyHubController : MonoBehaviour
 {
+    [Header("Scene Names")]
+    public string chapter1SceneName = "Chapter1";
+    public string chapter1twoSceneName = "Chapter1two";
+
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject; // VideoRawImage GO
+    public GameObject videoRawImageObject;   // VideoRawImage GO
+    public RawImage videoRawImage;           // drag RawImage component here (for black)
 
     [Header("BG (show when video hidden)")]
-    public GameObject bgImageObject;       // BG_Image GO
+    public GameObject bgImageObject;         // BG_Image GO
 
     [Header("Hub UI (CanvasGroups on each option)")]
     public CanvasGroup chatOptionGroup;
@@ -89,13 +94,12 @@ public class Chapter1DailyHubController : MonoBehaviour
     public int overworkProgressLoss = 2;
 
     [Header("Overwork: wipe-to-clean overlay")]
-    public WipeToClearOverlay wipeOverlay; // drag OrangeOverlay (with WipeToClearOverlay)
-    public float orangeTriggerLastSeconds = 2.0f; // last N seconds show overlay trigger moment
-    [Range(0.1f, 0.99f)] public float nearlyCleanThreshold = 0.80f; // target 80%
+    public WipeToClearOverlay wipeOverlay;
+    public float orangeTriggerLastSeconds = 2.0f;
+    [Range(0.1f, 0.99f)] public float nearlyCleanThreshold = 0.85f;
 
     // runtime state
     bool isPlaying = false;
-    bool chatLocked = false;
     bool coffeeUnlocked = false;
     int restTimesChosen = 0;
 
@@ -121,6 +125,8 @@ public class Chapter1DailyHubController : MonoBehaviour
             videoPlayer.Stop();
         }
 
+        if (videoRawImage != null) videoRawImage.color = Color.black;
+
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
@@ -129,29 +135,19 @@ public class Chapter1DailyHubController : MonoBehaviour
             studyButton.onClick.RemoveAllListeners();
             studyButton.onClick.AddListener(OnStudyClicked);
         }
-
         if (coffeeButton != null)
         {
             coffeeButton.onClick.RemoveAllListeners();
             coffeeButton.onClick.AddListener(OnRestClicked);
         }
-
         if (chatButton != null)
         {
             chatButton.onClick.RemoveAllListeners();
             chatButton.onClick.AddListener(OnChatClicked);
         }
 
-        chatLocked = false;
-        coffeeUnlocked = false;
-        restTimesChosen = 0;
-
-        SetOption(coffeeOptionGroup, coffeeButton, show: false, disableGO: true);
-        ApplyHubState(showHub: true);
-
         SetSpaceHintVisible(false);
         StopSpaceHintLoop();
-
         if (swipeAnim != null) swipeAnim.StopAndHide();
 
         if (blackoutGroup != null)
@@ -167,6 +163,9 @@ public class Chapter1DailyHubController : MonoBehaviour
             wipeOverlay.OnFinished -= OnOrangeWipeFinished;
             wipeOverlay.OnFinished += OnOrangeWipeFinished;
         }
+
+        // ✅ IMPORTANT: 初始 Hub 要顯示 Chat + Study（Coffee 未解鎖）
+        ApplyHubState(showHub: true);
     }
 
     void Update()
@@ -198,32 +197,18 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
-    // called by wipe overlay event
-    void OnOrangeWipeFinished()
+    // -------------------- UI Actions --------------------
+    void OnChatClicked()
     {
-        // ensure BG only
-        if (videoPlayer != null) videoPlayer.Stop();
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
-        if (bgImageObject != null) bgImageObject.SetActive(true);
+        if (isPlaying) return;
 
-        // unlock hub immediately
-        ApplyHubState(showHub: true);
-        isPlaying = false;
-
-        // optional: release blackout
-        if (blackoutGroup != null)
-        {
-            blackoutGroup.alpha = 0f;
-            blackoutGroup.blocksRaycasts = false;
-            blackoutGroup.interactable = false;
-        }
+        // ✅ 轉去新 scene 播 chat video
+        SceneManager.LoadScene(chapter1twoSceneName);
     }
 
-    // -------------------- UI Actions --------------------
     void OnStudyClicked()
     {
         if (isPlaying) return;
-        chatLocked = true;
         StartCoroutine(StudyDayRoutine());
     }
 
@@ -231,20 +216,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
         if (!coffeeUnlocked) return;
-
-        chatLocked = true;
         StartCoroutine(RestDayRoutine());
-    }
-
-    void OnChatClicked()
-    {
-        if (isPlaying) return;
-
-        chatLocked = true;
-
-        // 暫時：當 Rest；如果未解鎖 Rest，就當 Study
-        if (coffeeUnlocked) StartCoroutine(RestDayRoutine());
-        else StartCoroutine(StudyDayRoutine());
     }
 
     // -------------------- Day Routines --------------------
@@ -260,7 +232,6 @@ public class Chapter1DailyHubController : MonoBehaviour
         yield return PlayStudyWithSpace(studyVideoURL);
 
         coffeeUnlocked = true;
-        SetOption(coffeeOptionGroup, coffeeButton, show: true, disableGO: false);
 
         yield return SystemCheckRoutine();
 
@@ -314,70 +285,67 @@ public class Chapter1DailyHubController : MonoBehaviour
 
             yield return PlayOverworkFireThenWipe(overworkURL);
 
-            // if wipe finished, OnOrangeWipeFinished already set isPlaying=false and hub shown.
-            // stop the rest of this system routine.
-            if (!isPlaying) yield break;
-
-            int skip = Random.Range(overworkMinSkipDays, overworkMaxSkipDays + 1);
-            day += skip;
-
-            progress -= overworkProgressLoss;
-            if (progress < 0) progress = 0;
-
-            studyStreak = 0;
-
-            if (day > finalDay) day = finalDay;
-
-            yield return BlackoutRoutine(false);
-
-            if (day >= finalDay)
-            {
-                yield return SystemCheckRoutine();
-                yield break;
-            }
+            yield break; // wipe flow ends by event
         }
     }
 
-    // -------------------- Overwork: last seconds -> pause -> BG only -> wipe -> return hub --------------------
+    // -------------------- Overwork flow --------------------
     IEnumerator PlayOverworkFireThenWipe(string url)
     {
         if (wipeOverlay != null) wipeOverlay.EndWipeHide();
 
-        yield return PrepareVideo(url);
-        ShowVideo(true);
-        if (bgImageObject != null) bgImageObject.SetActive(false);
+        // no flash while preparing
+        yield return PrepareVideoNoBgFlash(url);
 
         videoPlayer.time = 0;
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.Play();
+
+        // wait until time advances (first frame)
+        yield return WaitUntilVideoActuallyPlays(2f);
 
         double len = videoPlayer.length;
         if (len <= 0.01) len = 8.0;
 
         double showAt = Mathf.Max(0f, (float)len - orangeTriggerLastSeconds);
 
-        // wait until last N seconds
         while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < showAt)
             yield return null;
 
-        // ✅ freeze video + switch to BG immediately (wipe background = BG only)
+        // wipe begins: freeze video, show BG only, hide options
+        ForceHideAllOptions();
+
         if (videoPlayer != null) videoPlayer.Pause();
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
-        // ✅ begin wiping now
         if (wipeOverlay != null)
         {
-            wipeOverlay.clearToFinish = nearlyCleanThreshold; // 0.80
+            wipeOverlay.clearToFinish = nearlyCleanThreshold;
             wipeOverlay.BeginWipe();
         }
 
-        // ✅ wait until wipe overlay completes (event will fire)
         while (wipeOverlay != null && wipeOverlay.gameObject.activeInHierarchy)
             yield return null;
+    }
 
-        // OnOrangeWipeFinished() handles hub + flags
-        yield break;
+    void OnOrangeWipeFinished()
+    {
+        if (videoPlayer != null) videoPlayer.Stop();
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        if (bgImageObject != null) bgImageObject.SetActive(true);
+
+        // ✅ wipe 完返 Hub（Chat + Study + Coffee(如已解鎖)）
+        ApplyHubState(showHub: true);
+
+        isPlaying = false;
+
+        if (blackoutGroup != null)
+        {
+            blackoutGroup.alpha = 0f;
+            blackoutGroup.blocksRaycasts = false;
+            blackoutGroup.interactable = false;
+        }
     }
 
     // -------------------- Blackout --------------------
@@ -400,10 +368,14 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
-    // -------------------- Video Helpers --------------------
-    IEnumerator PrepareVideo(string url)
+    // -------------------- Video Helpers (NO BG FLASH) --------------------
+    IEnumerator PrepareVideoNoBgFlash(string url)
     {
         if (videoPlayer == null) yield break;
+
+        if (bgImageObject != null) bgImageObject.SetActive(false);
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
+        if (videoRawImage != null) videoRawImage.color = Color.black;
 
         videoPlayer.Stop();
         videoPlayer.source = VideoSource.Url;
@@ -414,16 +386,18 @@ public class Chapter1DailyHubController : MonoBehaviour
         while (!videoPlayer.isPrepared) yield return null;
     }
 
-    void ShowVideo(bool show)
+    IEnumerator WaitUntilVideoActuallyPlays(float timeoutSeconds)
     {
-        if (show)
+        if (videoPlayer == null) yield break;
+
+        double t0 = videoPlayer.time;
+        float t = timeoutSeconds;
+
+        while (t > 0f)
         {
-            if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
-        }
-        else
-        {
-            if (videoPlayer != null) videoPlayer.Stop();
-            if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+            if (videoPlayer.time > t0 + 0.01) yield break;
+            t -= Time.unscaledDeltaTime;
+            yield return null;
         }
     }
 
@@ -431,15 +405,16 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (string.IsNullOrEmpty(url)) yield break;
 
-        yield return PrepareVideo(url);
-        ShowVideo(true);
-        if (bgImageObject != null) bgImageObject.SetActive(false);
+        yield return PrepareVideoNoBgFlash(url);
 
         videoPlayer.time = 0;
         videoPlayer.Play();
+        yield return WaitUntilVideoActuallyPlays(2f);
+
         while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
 
-        ShowVideo(false);
+        if (videoPlayer != null) videoPlayer.Stop();
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
@@ -448,29 +423,26 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (string.IsNullOrEmpty(url)) yield break;
         if (end <= start) yield break;
 
-        yield return PrepareVideo(url);
-        ShowVideo(true);
-        if (bgImageObject != null) bgImageObject.SetActive(false);
+        yield return PrepareVideoNoBgFlash(url);
 
         videoPlayer.time = start;
         videoPlayer.Play();
+        yield return WaitUntilVideoActuallyPlays(2f);
 
         while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < end)
             yield return null;
 
         videoPlayer.Pause();
-        ShowVideo(false);
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // Study video: press space => speed
+    // Study: press space -> speed
     IEnumerator PlayStudyWithSpace(string url)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
 
-        yield return PrepareVideo(url);
-        ShowVideo(true);
-        if (bgImageObject != null) bgImageObject.SetActive(false);
+        yield return PrepareVideoNoBgFlash(url);
 
         pressTimes.Clear();
         lastPressAt = Time.unscaledTime;
@@ -478,6 +450,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         videoPlayer.time = 0;
         videoPlayer.playbackSpeed = 0f;
         videoPlayer.Play();
+        yield return WaitUntilVideoActuallyPlays(2f);
 
         yield return new WaitForSecondsRealtime(hintShowDelay);
         StartSpaceHintLoop();
@@ -526,22 +499,22 @@ public class Chapter1DailyHubController : MonoBehaviour
         StopSpaceHintLoop();
         SetSpaceHintVisible(false);
 
-        ShowVideo(false);
+        if (videoPlayer != null) videoPlayer.Stop();
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // Rest first time: stop at 6s/10s and require swipe
+    // Rest: swipe stops
     IEnumerator PlayRestWithSwipeStops(string url, double stop1, double stop2)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
 
-        yield return PrepareVideo(url);
-        ShowVideo(true);
-        if (bgImageObject != null) bgImageObject.SetActive(false);
+        yield return PrepareVideoNoBgFlash(url);
 
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.time = 0;
         videoPlayer.Play();
+        yield return WaitUntilVideoActuallyPlays(2f);
 
         yield return PlayUntilTime(stop1);
         yield return WaitForSwipeAtPos(swipePos6s);
@@ -553,7 +526,8 @@ public class Chapter1DailyHubController : MonoBehaviour
         videoPlayer.Play();
         while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
 
-        ShowVideo(false);
+        if (videoPlayer != null) videoPlayer.Stop();
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
@@ -585,45 +559,40 @@ public class Chapter1DailyHubController : MonoBehaviour
         yield return null;
     }
 
-    // -------------------- Hub UI State --------------------
+    // -------------------- Hub UI --------------------
     void ApplyHubState(bool showHub)
     {
         if (!showHub)
         {
-            SetOption(chatOptionGroup, chatButton, show: false, disableGO: true);
-            SetOption(studyOptionGroup, studyButton, show: false, disableGO: true);
-            SetOption(coffeeOptionGroup, coffeeButton, show: false, disableGO: true);
+            ForceHideAllOptions();
             return;
         }
 
-        if (!chatLocked) SetOption(chatOptionGroup, chatButton, show: true, disableGO: false);
-        else SetOption(chatOptionGroup, chatButton, show: false, disableGO: true);
+        // ✅ Chat + Study always visible
+        SetOptionActive(chatOptionGroup, chatButton, true);
+        SetOptionActive(studyOptionGroup, studyButton, true);
 
-        SetOption(studyOptionGroup, studyButton, show: true, disableGO: false);
-
-        if (coffeeUnlocked) SetOption(coffeeOptionGroup, coffeeButton, show: true, disableGO: false);
-        else SetOption(coffeeOptionGroup, coffeeButton, show: false, disableGO: true);
+        // Coffee only when unlocked
+        SetOptionActive(coffeeOptionGroup, coffeeButton, coffeeUnlocked);
     }
 
-    void SetOption(CanvasGroup g, Button b, bool show, bool disableGO)
+    void ForceHideAllOptions()
+    {
+        if (chatOptionGroup != null) chatOptionGroup.gameObject.SetActive(false);
+        if (studyOptionGroup != null) studyOptionGroup.gameObject.SetActive(false);
+        if (coffeeOptionGroup != null) coffeeOptionGroup.gameObject.SetActive(false);
+    }
+
+    void SetOptionActive(CanvasGroup g, Button b, bool show)
     {
         if (g == null) return;
 
+        g.gameObject.SetActive(show);
         if (show)
         {
-            if (!g.gameObject.activeSelf) g.gameObject.SetActive(true);
             g.alpha = 1f;
             g.interactable = true;
             g.blocksRaycasts = true;
-        }
-        else
-        {
-            g.alpha = 0f;
-            g.interactable = false;
-            g.blocksRaycasts = false;
-
-            if (disableGO && g.gameObject.activeSelf)
-                g.gameObject.SetActive(false);
         }
 
         if (b != null) b.interactable = show;
