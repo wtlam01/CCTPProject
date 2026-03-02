@@ -23,7 +23,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     public GameObject fingerHintFallback;
 
     [Header("Fade To Black Overlay (between videos)")]
-    public CanvasGroup blackFadeGroup;
+    public CanvasGroup blackFadeGroup;          // BlackFadeOverlay 的 CanvasGroup
     public float fadeFromBlackDuration = 0.8f;
 
     [Header("Second -> Third Fade")]
@@ -70,9 +70,10 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             introOverlayGroup.interactable = true;
         }
 
+        // ✅ 重要：開場先黑住，避免第一下 prepare 閃背景
         if (blackFadeGroup != null)
         {
-            blackFadeGroup.alpha = 0f;
+            blackFadeGroup.alpha = 1f;
             blackFadeGroup.blocksRaycasts = true;
             blackFadeGroup.interactable = true;
         }
@@ -92,6 +93,9 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         {
             videoPlayer.loopPointReached -= OnVideoFinished;
             videoPlayer.loopPointReached += OnVideoFinished;
+
+            // ✅ 減少「play 咗但第一幀未到」嘅閃
+            videoPlayer.waitForFirstFrame = true;
         }
 
         // Intro：停留 -> 淡出
@@ -109,9 +113,13 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         SetTextHintVisible(false);
         HideFinger();
 
+        // ✅ 呢段時間可以由黑淡出，露返 sofa（視覺舒服）
+        if (blackFadeGroup != null)
+            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, 0.6f);
+
         yield return new WaitForSeconds(sofaShowTime);
 
-        // 播第一條
+        // 播第一條：先黑住 prepare，再由黑淡出（完全避免 gap）
         if (sofaImage != null) sofaImage.SetActive(false);
         if (videoRawImage != null) videoRawImage.SetActive(true);
 
@@ -126,9 +134,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         hasShownHintOnce = false;
         switchingVideos = false;
 
-        if (blackFadeGroup != null) blackFadeGroup.alpha = 0f;
-
-        yield return PlayVideo(firstVideoURL);
+        yield return PlayVideoCovered(firstVideoURL, fadeFromBlack: true);
     }
 
     void Update()
@@ -214,7 +220,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             return;
         }
 
-        // 第二條播完係 fallback（如果 length 讀唔到，至少播完會切）
+        // 第二條播完 fallback（萬一 length 讀唔到）
         if (vp.url == secondVideoURL)
         {
             if (secondWatcherCo == null)
@@ -232,9 +238,8 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         HideFinger();
         SetTextHintVisible(false);
 
-        if (blackFadeGroup != null) blackFadeGroup.alpha = 0f;
-
-        yield return PlayVideo(secondVideoURL);
+        // ✅ 黑住換片，避免 gap
+        yield return PlayVideoCovered(secondVideoURL, fadeFromBlack: true);
 
         // ✅ 開始監察第二條：到尾 2 秒 -> fade -> 換第三條
         if (secondWatcherCo != null) StopCoroutine(secondWatcherCo);
@@ -268,18 +273,14 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         while (videoPlayer.isPlaying && videoPlayer.time < fadeStartTime)
             yield return null;
 
-        // 開始淡出到黑
         switchingVideos = true;
 
+        // ✅ 由片尾淡到全黑
         if (blackFadeGroup != null)
             yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, fadeToBlackDuration);
 
-        // 換第三條
-        yield return PlayVideo(thirdVideoURL);
-
-        // 由黑淡出
-        if (blackFadeGroup != null)
-            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, fadeFromBlackDuration);
+        // ✅ 黑住 prepare + 播第三條，再由黑淡出（避免 gap）
+        yield return PlayVideoCovered(thirdVideoURL, fadeFromBlack: true);
 
         switchingVideos = false;
         secondWatcherCo = null;
@@ -292,10 +293,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         if (blackFadeGroup != null)
             yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, fadeToBlackDuration);
 
-        yield return PlayVideo(thirdVideoURL);
-
-        if (blackFadeGroup != null)
-            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, fadeFromBlackDuration);
+        yield return PlayVideoCovered(thirdVideoURL, fadeFromBlack: true);
 
         switchingVideos = false;
     }
@@ -315,18 +313,38 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         switchingVideos = false;
     }
 
-    IEnumerator PlayVideo(string url)
+    // =========================
+    // ✅ 核心：黑住 Prepare，等 texture ready 再淡出
+    // =========================
+    IEnumerator PlayVideoCovered(string url, bool fadeFromBlack)
     {
         if (videoPlayer == null) yield break;
 
+        // 1) 先即刻黑（避免露底）
+        if (blackFadeGroup != null)
+            blackFadeGroup.alpha = 1f;
+
+        // 2) prepare 新片（黑住做）
         videoPlayer.Stop();
         videoPlayer.url = url;
-
         videoPlayer.Prepare();
         while (!videoPlayer.isPrepared) yield return null;
 
+        // 3) 播放
         videoPlayer.time = 0;
         videoPlayer.Play();
+
+        // 4) 等到真係有畫面（prepared 但 texture 未到會閃）
+        float t = 0f;
+        while (videoPlayer.texture == null && t < 2f)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // 5) 由黑淡出
+        if (fadeFromBlack && blackFadeGroup != null)
+            yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, fadeFromBlackDuration);
     }
 
     void SetTextHintVisible(bool visible)
