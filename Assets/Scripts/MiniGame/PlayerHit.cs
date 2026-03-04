@@ -6,7 +6,7 @@ public class PlayerHit : MonoBehaviour
     public GameObject gameOverPanel;
 
     [Header("Score")]
-    public ScoreManager scoreManager; // 拖 UIManager 上嗰個 ScoreManager 落嚟
+    public ScoreManager scoreManager;   // ← 加呢行
 
     [Header("Stop stuff (optional) - drag the COMPONENTS here")]
     public MonoBehaviour[] scriptsToDisable;
@@ -21,7 +21,7 @@ public class PlayerHit : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
 
-        if (scoreManager != null)
+        if (scoreManager != null)        // ← 加呢行
             scoreManager.StopScore();
 
         if (scriptsToDisable != null)
@@ -36,11 +36,13 @@ public class PlayerHit : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Obstacle")) TriggerGameOver();
+        if (other.CompareTag("Obstacle"))
+            TriggerGameOver();
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.CompareTag("Obstacle")) TriggerGameOver();
+        if (collision.collider.CompareTag("Obstacle"))
+            TriggerGameOver();
     }
 }
