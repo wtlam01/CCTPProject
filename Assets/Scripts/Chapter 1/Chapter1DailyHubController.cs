@@ -14,8 +14,8 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;   // VideoRawImage GO
-    public RawImage videoRawImage;           // drag RawImage component here (for black)
+    public GameObject videoRawImageObject;   // VideoRawImage GO (用來顯示/隱藏 video 畫面層)
+    public RawImage videoRawImage;           // 可留空；你而家 set None 先見到片都 OK
 
     [Header("BG (show when video hidden)")]
     public GameObject bgImageObject;         // BG_Image GO
@@ -98,10 +98,13 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float orangeTriggerLastSeconds = 2.0f;
     [Range(0.1f, 0.99f)] public float nearlyCleanThreshold = 0.85f;
 
-    // runtime state
+    // ---------------- Runtime State ----------------
     bool isPlaying = false;
     bool coffeeUnlocked = false;
     int restTimesChosen = 0;
+
+    // ✅ 你要：一旦玩家按過 Study，就永遠唔再出 Chat
+    bool chatLockedAfterStudy = false;
 
     // study press tracking
     readonly Queue<float> pressTimes = new Queue<float>();
@@ -116,6 +119,7 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     void Awake()
     {
+        // VideoPlayer base
         if (videoPlayer != null)
         {
             videoPlayer.playOnAwake = false;
@@ -125,31 +129,38 @@ public class Chapter1DailyHubController : MonoBehaviour
             videoPlayer.Stop();
         }
 
+        // optional: raw image color
         if (videoRawImage != null) videoRawImage.color = Color.black;
 
+        // start state: show BG, hide video layer
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
+        // hook buttons
         if (studyButton != null)
         {
             studyButton.onClick.RemoveAllListeners();
             studyButton.onClick.AddListener(OnStudyClicked);
         }
+
         if (coffeeButton != null)
         {
             coffeeButton.onClick.RemoveAllListeners();
             coffeeButton.onClick.AddListener(OnRestClicked);
         }
+
         if (chatButton != null)
         {
             chatButton.onClick.RemoveAllListeners();
             chatButton.onClick.AddListener(OnChatClicked);
         }
 
+        // hints
         SetSpaceHintVisible(false);
         StopSpaceHintLoop();
         if (swipeAnim != null) swipeAnim.StopAndHide();
 
+        // blackout
         if (blackoutGroup != null)
         {
             blackoutGroup.alpha = 0f;
@@ -157,6 +168,7 @@ public class Chapter1DailyHubController : MonoBehaviour
             blackoutGroup.interactable = false;
         }
 
+        // wipe overlay
         if (wipeOverlay != null)
         {
             wipeOverlay.EndWipeHide();
@@ -164,7 +176,7 @@ public class Chapter1DailyHubController : MonoBehaviour
             wipeOverlay.OnFinished += OnOrangeWipeFinished;
         }
 
-        // ✅ IMPORTANT: 初始 Hub 要顯示 Chat + Study（Coffee 未解鎖）
+        // ✅ 初始 Hub：Chat + Study；Coffee 未解鎖
         ApplyHubState(showHub: true);
     }
 
@@ -172,23 +184,25 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (!waitingSwipe) return;
 
+        // keyboard fallback
         if (Keyboard.current != null && Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             swipeTriggered = true;
             return;
         }
 
-        if (Mouse.current == null) return;
+        var mouse = Mouse.current;
+        if (mouse == null) return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (mouse.leftButton.wasPressedThisFrame)
         {
-            swipeStartPos = Mouse.current.position.ReadValue();
+            swipeStartPos = mouse.position.ReadValue();
             swipeStartTime = Time.unscaledTime;
         }
 
-        if (Mouse.current.leftButton.wasReleasedThisFrame)
+        if (mouse.leftButton.wasReleasedThisFrame)
         {
-            Vector2 endPos = Mouse.current.position.ReadValue();
+            Vector2 endPos = mouse.position.ReadValue();
             float dt = Time.unscaledTime - swipeStartTime;
             float dy = endPos.y - swipeStartPos.y;
 
@@ -202,13 +216,17 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        // ✅ 轉去新 scene 播 chat video
+        // 轉 scene 播 chat video
         SceneManager.LoadScene(chapter1twoSceneName);
     }
 
     void OnStudyClicked()
     {
         if (isPlaying) return;
+
+        // ✅ 一旦玩家按過 Study，就永遠鎖住 Chat
+        chatLockedAfterStudy = true;
+
         StartCoroutine(StudyDayRoutine());
     }
 
@@ -236,6 +254,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         yield return SystemCheckRoutine();
 
         if (!isPlaying) yield break;
+
         ApplyHubState(showHub: true);
         isPlaying = false;
     }
@@ -258,6 +277,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         yield return SystemCheckRoutine();
 
         if (!isPlaying) yield break;
+
         ApplyHubState(showHub: true);
         isPlaying = false;
     }
@@ -282,9 +302,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (studyStreak >= overworkTriggerStreak)
         {
             yield return BlackoutRoutine(true);
-
             yield return PlayOverworkFireThenWipe(overworkURL);
-
             yield break; // wipe flow ends by event
         }
     }
@@ -294,14 +312,12 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (wipeOverlay != null) wipeOverlay.EndWipeHide();
 
-        // no flash while preparing
         yield return PrepareVideoNoBgFlash(url);
 
         videoPlayer.time = 0;
         videoPlayer.playbackSpeed = 1f;
         videoPlayer.Play();
 
-        // wait until time advances (first frame)
         yield return WaitUntilVideoActuallyPlays(2f);
 
         double len = videoPlayer.length;
@@ -312,7 +328,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < showAt)
             yield return null;
 
-        // wipe begins: freeze video, show BG only, hide options
+        // wipe begins
         ForceHideAllOptions();
 
         if (videoPlayer != null) videoPlayer.Pause();
@@ -335,9 +351,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
-        // ✅ wipe 完返 Hub（Chat + Study + Coffee(如已解鎖)）
         ApplyHubState(showHub: true);
-
         isPlaying = false;
 
         if (blackoutGroup != null)
@@ -373,8 +387,11 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (videoPlayer == null) yield break;
 
+        // hide BG, show video layer
         if (bgImageObject != null) bgImageObject.SetActive(false);
         if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
+
+        // optional: make sure black
         if (videoRawImage != null) videoRawImage.color = Color.black;
 
         videoPlayer.Stop();
@@ -568,34 +585,38 @@ public class Chapter1DailyHubController : MonoBehaviour
             return;
         }
 
-        // ✅ Chat + Study always visible
-        SetOptionActive(chatOptionGroup, chatButton, true);
-        SetOptionActive(studyOptionGroup, studyButton, true);
+        // 確保 panel keep active
+        if (chatOptionGroup != null) chatOptionGroup.gameObject.SetActive(true);
+        if (studyOptionGroup != null) studyOptionGroup.gameObject.SetActive(true);
+        if (coffeeOptionGroup != null) coffeeOptionGroup.gameObject.SetActive(true);
 
-        // Coffee only when unlocked
-        SetOptionActive(coffeeOptionGroup, coffeeButton, coffeeUnlocked);
+        // ✅ Chat：如果玩家按過 Study，就永遠唔再出
+        bool showChat = !chatLockedAfterStudy;
+        SetOptionVisible(chatOptionGroup, chatButton, showChat);
+
+        // ✅ Study 永遠顯示
+        SetOptionVisible(studyOptionGroup, studyButton, true);
+
+        // ✅ Coffee 只係解鎖後出
+        SetOptionVisible(coffeeOptionGroup, coffeeButton, coffeeUnlocked);
     }
 
     void ForceHideAllOptions()
     {
-        if (chatOptionGroup != null) chatOptionGroup.gameObject.SetActive(false);
-        if (studyOptionGroup != null) studyOptionGroup.gameObject.SetActive(false);
-        if (coffeeOptionGroup != null) coffeeOptionGroup.gameObject.SetActive(false);
+        SetOptionVisible(chatOptionGroup, chatButton, false);
+        SetOptionVisible(studyOptionGroup, studyButton, false);
+        SetOptionVisible(coffeeOptionGroup, coffeeButton, false);
     }
 
-    void SetOptionActive(CanvasGroup g, Button b, bool show)
+    void SetOptionVisible(CanvasGroup g, Button b, bool visible)
     {
         if (g == null) return;
 
-        g.gameObject.SetActive(show);
-        if (show)
-        {
-            g.alpha = 1f;
-            g.interactable = true;
-            g.blocksRaycasts = true;
-        }
+        g.alpha = visible ? 1f : 0f;
+        g.interactable = visible;
+        g.blocksRaycasts = visible;
 
-        if (b != null) b.interactable = show;
+        if (b != null) b.interactable = visible;
     }
 
     // -------------------- Space Hint --------------------

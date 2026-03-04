@@ -1536,8 +1536,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95811fa2ad4b54d8bbe2d11ba99ce82f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1DailyHubController
+  chapter1SceneName: Chapter1
+  chapter1twoSceneName: Chapter1two
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
+  videoRawImage: {fileID: 0}
   bgImageObject: {fileID: 1949568320}
   chatOptionGroup: {fileID: 1887546455}
   studyOptionGroup: {fileID: 639274278}
