@@ -11,6 +11,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     [Header("Scene Names")]
     public string chapter1SceneName = "Chapter1";
     public string chapter1twoSceneName = "Chapter1two";
+    public string chapter2SceneName = "Chapter2"; // ✅ after result -> Chapter2
 
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
@@ -85,20 +86,27 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float swipeMinDistance = 120f;
     public float swipeMaxTime = 0.6f;
 
+    // ===================== NEW RESULT SYSTEM =====================
     [Header("Hidden System (NO countdown shown)")]
     public int day = 1;
-    public int progress = 0;
+
+    [Tooltip("✅ count how many times player chose Study")]
+    public int studyCount = 0;
+
+    [Tooltip("✅ streak for overwork trigger (3 studies in a row)")]
     public int studyStreak = 0;
 
-    [Header("Targets")]
-    public int finalDay = 15;
-    public int passProgress = 18;
+    [Header("Day pacing")]
+    public int dayPerChoice = 2;   // Study/Rest both +2 days
+    public int finalDay = 15;      // exam at day >= 15 (8 choices)
 
+    [Header("Balanced Success Rule")]
+    public int successStudyMin = 5; // success if studyCount == 5 or 6
+    public int successStudyMax = 6;
+
+    // ===================== OVERWORK EFFECT (keep your original) =====================
     [Header("Overwork (trigger by streak)")]
     public int overworkTriggerStreak = 3;
-    public int overworkMinSkipDays = 2;
-    public int overworkMaxSkipDays = 3;
-    public int overworkProgressLoss = 2;
 
     [Header("Overwork: wipe-to-clean overlay")]
     public WipeToClearOverlay wipeOverlay;
@@ -110,10 +118,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     bool coffeeUnlocked = false;
     int restTimesChosen = 0;
 
-    // ✅ 一旦玩家按過 Study，就永遠唔再出 Chat
     bool chatLockedAfterStudy = false;
-
-    // ✅ 記住：Study hint 已經出過（之後再播 Study 就唔需要）
     bool studyHintAlreadyShown = false;
 
     // study press tracking
@@ -126,6 +131,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     Vector2 swipeStartPos;
     float swipeStartTime;
     bool swipeTriggered = false;
+
+    // overwork runtime
+    bool overworkPending = false;
 
     void Awake()
     {
@@ -231,6 +239,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
         if (!coffeeUnlocked) return;
+
         StartCoroutine(RestDayRoutine());
     }
 
@@ -240,8 +249,9 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        day += 1;
-        progress += 2;
+        // ✅ Study choice effects
+        day += dayPerChoice;
+        studyCount += 1;
         studyStreak += 1;
 
         yield return PlayStudyWithSpace(studyVideoURL);
@@ -249,7 +259,6 @@ public class Chapter1DailyHubController : MonoBehaviour
         coffeeUnlocked = true;
 
         yield return SystemCheckRoutine();
-
         if (!isPlaying) yield break;
 
         ApplyHubState(showHub: true);
@@ -261,7 +270,8 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        day += 1;
+        // ✅ Rest choice effects
+        day += dayPerChoice;
         studyStreak = 0;
 
         restTimesChosen++;
@@ -272,7 +282,6 @@ public class Chapter1DailyHubController : MonoBehaviour
             yield return PlayUrlSegment(restVideoURL, restRepeatStart, restRepeatEnd);
 
         yield return SystemCheckRoutine();
-
         if (!isPlaying) yield break;
 
         ApplyHubState(showHub: true);
@@ -282,26 +291,41 @@ public class Chapter1DailyHubController : MonoBehaviour
     // -------------------- System Check --------------------
     IEnumerator SystemCheckRoutine()
     {
+        // ✅ 1) Exam check first
         if (day >= finalDay)
         {
             day = finalDay;
 
             yield return PlayUrlFull(examURL);
 
-            if (progress >= passProgress) yield return PlayUrlFull(successURL);
+            bool pass = (studyCount >= successStudyMin && studyCount <= successStudyMax);
+
+            if (pass) yield return PlayUrlFull(successURL);
             else yield return PlayUrlFull(failureURL);
 
             ApplyHubState(showHub: false);
             isPlaying = false;
+
+            // ✅ go Chapter2 after result
+            SceneManager.LoadScene(chapter2SceneName);
             yield break;
         }
 
+        // ✅ 2) Overwork: 3 studies in a row
         if (studyStreak >= overworkTriggerStreak)
         {
+            // lock so you don't double trigger
+            studyStreak = 0;
+            overworkPending = true;
+
             yield return BlackoutRoutine(true);
             yield return PlayOverworkFireThenWipe(overworkURL);
+
+            // After wipe finishes, OnOrangeWipeFinished() will restore UI + unlock control.
             yield break;
         }
+
+        yield break;
     }
 
     // -------------------- Overwork flow --------------------
@@ -343,19 +367,33 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     void OnOrangeWipeFinished()
     {
+        // stop video + restore BG
         if (videoPlayer != null) videoPlayer.Stop();
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
-        ApplyHubState(showHub: true);
-        isPlaying = false;
-
+        // optional: blackout off
         if (blackoutGroup != null)
         {
             blackoutGroup.alpha = 0f;
             blackoutGroup.blocksRaycasts = false;
             blackoutGroup.interactable = false;
         }
+
+        // ✅ keep your “something happened” effect (soft penalty)
+        // Here we only push time forward a bit to simulate lost time (hidden).
+        if (overworkPending)
+        {
+            overworkPending = false;
+
+            // hidden consequence: lose 2 extra days
+            day += dayPerChoice;
+
+            // DO NOT change studyCount (it should represent player decisions)
+        }
+
+        ApplyHubState(showHub: true);
+        isPlaying = false;
     }
 
     // -------------------- Blackout --------------------
@@ -460,7 +498,6 @@ public class Chapter1DailyHubController : MonoBehaviour
 
         int pressCount = 0;
 
-        // ✅ 只係第一次先 show hint
         bool shouldShowHintThisPlay = true;
         if (studyHintOnlyFirstTime && studyHintAlreadyShown)
             shouldShowHintThisPlay = false;
@@ -498,8 +535,6 @@ public class Chapter1DailyHubController : MonoBehaviour
                 if (shouldShowHintThisPlay)
                 {
                     pressCount++;
-
-                    // ✅ 第一次播放：按夠 N 次先收埋 hint（例如 3）
                     if (pressCount >= hintHideAfterPresses)
                     {
                         StopSpaceHintLoop();
@@ -529,7 +564,6 @@ public class Chapter1DailyHubController : MonoBehaviour
         StopSpaceHintLoop();
         SetSpaceHintVisible(false);
 
-        // ✅ 一播完第一次 Study，就記住：以後唔再需要 hint
         if (studyHintOnlyFirstTime)
             studyHintAlreadyShown = true;
 

@@ -1,11 +1,16 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class RestartButton : MonoBehaviour
+public class RestartButtonHook : MonoBehaviour
 {
+    public bool reloadCurrentScene = true;
+
     public void Restart()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (Chapter1TwoGameState.Instance != null)
+            Chapter1TwoGameState.Instance.AddRestart();
+
+        if (reloadCurrentScene)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

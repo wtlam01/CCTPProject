@@ -1538,6 +1538,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1DailyHubController
   chapter1SceneName: Chapter1
   chapter1twoSceneName: Chapter1two
+  chapter2SceneName: Chapter2
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
   videoRawImage: {fileID: 0}
@@ -1573,6 +1574,8 @@ MonoBehaviour:
   releaseTime: 0.14
   pressPause: 0.7
   loopDelay: 0.5
+  studyHintOnlyFirstTime: 1
+  hintHideAfterPresses: 3
   restStop1: 6
   restStop2: 10
   restRepeatStart: 0
@@ -1583,17 +1586,16 @@ MonoBehaviour:
   swipeMinDistance: 120
   swipeMaxTime: 0.6
   day: 1
-  progress: 0
+  studyCount: 0
   studyStreak: 0
+  dayPerChoice: 2
   finalDay: 15
-  passProgress: 14
+  successStudyMin: 5
+  successStudyMax: 6
   overworkTriggerStreak: 3
-  overworkMinSkipDays: 2
-  overworkMaxSkipDays: 3
-  overworkProgressLoss: 2
   wipeOverlay: {fileID: 1584740083}
   orangeTriggerLastSeconds: 2
-  nearlyCleanThreshold: 0.8
+  nearlyCleanThreshold: 0.85
 --- !u!1 &1887546453
 GameObject:
   m_ObjectHideFlags: 0

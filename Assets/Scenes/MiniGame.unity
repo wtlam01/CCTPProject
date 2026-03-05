@@ -1505,7 +1505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniGameStartController
   hintUI: {fileID: 473296938}
-  startPanel: {fileID: 0}
+  startPanel: {fileID: 421136206}
   enableOnStart:
   - {fileID: 1811642908}
   - {fileID: 167928854}
@@ -1527,13 +1527,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverUIController
   gameOverPanel: {fileID: 1237084254}
-  doorButtonGO: {fileID: 0}
-  startPanel: {fileID: 0}
-  doorController: {fileID: 1253545911}
-  hubSceneName: Chapter1two
-  miniGameSceneName: MiniGame
-  lockOnRestartCount: 3
-  lockOnlyOneRun: 1
+  doorButtonGO: {fileID: 1253545905}
+  hideDoorOnRestartCount: 3
 --- !u!1 &1357424619
 GameObject:
   m_ObjectHideFlags: 0
@@ -2523,6 +2518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 419ff34d163af4eefb576baea6868cb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RestartButton
+  reloadCurrentScene: 1
 --- !u!1 &1910252060
 GameObject:
   m_ObjectHideFlags: 0

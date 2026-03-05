@@ -305,11 +305,11 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1648050916}
   - {fileID: 1949568321}
   - {fileID: 1887546454}
   - {fileID: 639274277}
   - {fileID: 1564364387}
-  - {fileID: 1648050916}
   - {fileID: 1156947298}
   - {fileID: 1400491278}
   m_Father: {fileID: 0}
@@ -487,9 +487,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1TwoGameState
   day: 0
   progress: 0
-  playSessionCount: 0
+  studyTogetherCount: 0
   restartCount: 0
-  exitLockedThisGameOver: 0
+  returnedFromMiniGame: 0
+  studyHintAlreadyShown: 0
 --- !u!4 &167001746
 Transform:
   m_ObjectHideFlags: 0
@@ -1224,6 +1225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1TwoSocialInfluenceController
   miniGameSceneName: MiniGame
   returnSceneName: Chapter1two
+  nextSceneName: Chapter2
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
   videoRawImage: {fileID: 0}
@@ -1234,14 +1236,13 @@ MonoBehaviour:
   playButton: {fileID: 1887546456}
   studyTogetherURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/233Studying4ogether.mp4
   peerInfluenceURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/232PeerInfluence1.mp4
-  examVideoURL: 
-  successVideoURL: 
-  failureVideoURL: 
+  examVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4
+  successVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4
+  failureVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4
   MAX_DAYS: 21
   dayPerChoice: 3
   requiredProgress: 4
-  day: 0
-  progress: 0
+  maxStudyTogetherAllowed: 5
   sampleWindowSeconds: 0.6
   maxPressesPerSecond: 8
   maxPlaybackSpeed: 5
@@ -1290,9 +1291,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Chapter1TwoGameState
   day: 0
   progress: 0
-  playSessionCount: 0
+  studyTogetherCount: 0
   restartCount: 0
-  exitLockedThisGameOver: 0
+  returnedFromMiniGame: 0
+  studyHintAlreadyShown: 0
 --- !u!4 &1777495573
 Transform:
   m_ObjectHideFlags: 0

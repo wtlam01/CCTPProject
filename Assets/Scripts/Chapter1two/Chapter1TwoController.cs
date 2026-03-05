@@ -9,20 +9,21 @@ using UnityEngine.SceneManagement;
 public class Chapter1TwoController : MonoBehaviour
 {
     [Header("Scenes")]
-    public string miniGameSceneName = "MiniGame";   // ✅ 你 runner scene 名
-    public string returnSceneName = "Chapter1two";  // 一般唔使改
+    public string miniGameSceneName = "MiniGame";   // runner scene
+    public string returnSceneName = "Chapter1two";  // hub scene
+    public string nextSceneName = "Chapter2";       // ✅ after success/failure -> Chapter2
 
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;   // Canvas/VideoRawImage
+    public GameObject videoRawImageObject;   // Canvas/VideoRawImage (GameObject)
     public RawImage videoRawImage;           // optional (can be None)
 
     [Header("BG (show when video hidden)")]
     public GameObject bgImageObject;         // Canvas/BG_Image
 
     [Header("Hub UI")]
-    public CanvasGroup optionStudyGroup;     // Canvas/Option_Study (CanvasGroup)
-    public CanvasGroup optionPlayGroup;      // Canvas/Option_Play (CanvasGroup)
+    public CanvasGroup optionStudyGroup;     // Option_Study (CanvasGroup)
+    public CanvasGroup optionPlayGroup;      // Option_Play (CanvasGroup)
     public Button studyButton;
     public Button playButton;
 
@@ -31,22 +32,21 @@ public class Chapter1TwoController : MonoBehaviour
     public string peerInfluenceURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/232PeerInfluence1.mp4";
 
     [Header("Exam / Result URLs")]
-    public string examVideoURL = "";        // fill in Inspector
-    public string successVideoURL = "";     // optional
-    public string failureVideoURL = "";     // optional
+    public string examVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
+    public string successVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
+    public string failureVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
 
     [Header("System")]
     public int MAX_DAYS = 21;
     public int dayPerChoice = 3;
-    public int requiredProgress = 4;
 
-    [Header("Hidden Vars (NO UI)")]
-    public int day = 0;
-    public int progress = 0;
+    [Header("Result Rules")]
+    public int requiredProgress = 4;           // progress >= 4
+    public int maxStudyTogetherAllowed = 5;    // studyTogetherCount <= 5  (>=6 fails)
 
     bool isPlaying = false;
 
-    // ----------------- Study: press-rate controls speed (Chapter1 style) -----------------
+    // ----------------- Study: press-rate controls speed -----------------
     [Header("StudyTogether: press rate -> playbackSpeed")]
     public float sampleWindowSeconds = 0.6f;
     public float maxPressesPerSecond = 8f;
@@ -60,8 +60,8 @@ public class Chapter1TwoController : MonoBehaviour
     float lastPressAt = -999f;
 
     [Header("Space Hint")]
-    public RectTransform spaceHintRect;      // Canvas/SpaceHint RectTransform
-    public CanvasGroup spaceHintGroup;       // CanvasGroup on SpaceHint (recommended)
+    public RectTransform spaceHintRect;      // Canvas/SpaceHint
+    public CanvasGroup spaceHintGroup;       // CanvasGroup on SpaceHint
     public float hintShowDelay = 0.25f;
 
     [Header("Space Hint Animation")]
@@ -72,14 +72,10 @@ public class Chapter1TwoController : MonoBehaviour
     public float loopDelay = 0.50f;
 
     [Header("Hint Rules")]
-    public int hintHideAfterPresses = 3;       // 第一次 Study：按 3 次先收埋 hint
-    public bool showHintOnlyFirstTime = true;  // 第二次起唔再 show hint
+    public int hintHideAfterPresses = 3;
+    public bool showHintOnlyFirstTime = true;
 
     Coroutine spaceHintCo;
-    bool studyHintAlreadyShown = false;
-
-    // mini game return flag (static)
-    static bool returnedFromMiniGame = false;
 
     void Awake()
     {
@@ -94,7 +90,8 @@ public class Chapter1TwoController : MonoBehaviour
 
         if (videoRawImage != null) videoRawImage.color = Color.black;
 
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        // Keep VideoRawImage GO active to avoid flashing
+        if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
         if (studyButton != null)
@@ -113,13 +110,16 @@ public class Chapter1TwoController : MonoBehaviour
         StopSpaceHintLoop();
 
         ShowHub(true);
+        ShowVideo(false);
     }
 
     void Start()
     {
-        if (returnedFromMiniGame)
+        // ✅ If returned from MiniGame
+        var gs = Chapter1TwoGameState.Instance;
+        if (gs != null && gs.returnedFromMiniGame)
         {
-            returnedFromMiniGame = false;
+            gs.returnedFromMiniGame = false;
             StartCoroutine(ReturnFromMiniGameRoutine());
         }
     }
@@ -135,8 +135,8 @@ public class Chapter1TwoController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        day += dayPerChoice;
-        progress += 1;
+        var gs = Chapter1TwoGameState.Instance;
+        if (gs != null) gs.AddStudyChoice(dayPerChoice, 1); // includes studyTogetherCount++
 
         StopAllCoroutines();
         StartCoroutine(PlayStudyTogether_PressRateSpeed());
@@ -146,15 +146,20 @@ public class Chapter1TwoController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        // ✅ day +3（Play）
-        day += dayPerChoice;
+        var gs = Chapter1TwoGameState.Instance;
+        if (gs != null)
+        {
+            gs.AddPlayChoice(dayPerChoice);
 
-        // ✅ 先播 peer influence video，再入 MiniGame
+            // Each new mini-game run from hub: restartCount back to 1
+            gs.ResetMiniGameRestartCount();
+        }
+
         StopAllCoroutines();
         StartCoroutine(PlayPeerInfluenceThenGoMiniGame());
     }
 
-    // ✅ Play: peerInfluence video -> go minigame
+    // Play: peerInfluence video -> go minigame
     IEnumerator PlayPeerInfluenceThenGoMiniGame()
     {
         isPlaying = true;
@@ -163,7 +168,6 @@ public class Chapter1TwoController : MonoBehaviour
         if (!string.IsNullOrEmpty(peerInfluenceURL))
             yield return PlayUrlFull(peerInfluenceURL);
 
-        // 入 runner scene
         SceneManager.LoadScene(miniGameSceneName);
     }
 
@@ -185,9 +189,10 @@ public class Chapter1TwoController : MonoBehaviour
 
         yield return WaitUntilVideoActuallyPlays(2f);
 
-        bool shouldShowHintThisPlay = true;
-        if (showHintOnlyFirstTime && studyHintAlreadyShown)
-            shouldShowHintThisPlay = false;
+        // hint only first time (tracked in GameState)
+        var gs = Chapter1TwoGameState.Instance;
+        bool already = (gs != null && gs.studyHintAlreadyShown);
+        bool shouldShowHintThisPlay = !(showHintOnlyFirstTime && already);
 
         if (shouldShowHintThisPlay)
         {
@@ -207,8 +212,7 @@ public class Chapter1TwoController : MonoBehaviour
 
         while (videoPlayer != null && videoPlayer.time < duration - endPadding)
         {
-            bool pressedThisFrame =
-                (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame);
+            bool pressedThisFrame = (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame);
 
             if (pressedThisFrame)
             {
@@ -248,8 +252,8 @@ public class Chapter1TwoController : MonoBehaviour
         StopSpaceHintLoop();
         SetSpaceHintVisible(false);
 
-        if (showHintOnlyFirstTime)
-            studyHintAlreadyShown = true;
+        if (gs != null && showHintOnlyFirstTime)
+            gs.studyHintAlreadyShown = true;
 
         if (videoPlayer != null) videoPlayer.Stop();
         ShowVideo(false);
@@ -263,7 +267,10 @@ public class Chapter1TwoController : MonoBehaviour
         if (videoPlayer != null) videoPlayer.Stop();
         ShowVideo(false);
 
-        if (day >= MAX_DAYS)
+        var gs = Chapter1TwoGameState.Instance;
+        int d = (gs != null) ? gs.day : 0;
+
+        if (d >= MAX_DAYS)
         {
             StopAllCoroutines();
             StartCoroutine(PlayExamAndResolve());
@@ -280,25 +287,26 @@ public class Chapter1TwoController : MonoBehaviour
         isPlaying = true;
         ShowHub(false);
 
-        if (string.IsNullOrEmpty(examVideoURL))
-        {
-            Debug.LogWarning("ExamVideoURL is empty (Chapter1two).");
-            isPlaying = false;
-            yield break;
-        }
-
         yield return PlayUrlFull(examVideoURL);
 
-        bool pass = (progress >= requiredProgress);
+        var gs = Chapter1TwoGameState.Instance;
+        int p = (gs != null) ? gs.progress : 0;
+        int st = (gs != null) ? gs.studyTogetherCount : 0;
 
-        if (pass && !string.IsNullOrEmpty(successVideoURL))
-            yield return PlayUrlFull(successVideoURL);
-        else if (!pass && !string.IsNullOrEmpty(failureVideoURL))
-            yield return PlayUrlFull(failureVideoURL);
+        // ✅ NEW RULE:
+        // Success = progress >= 4 AND studyTogetherCount <= 5
+        // Failure if progress < 4 OR studyTogetherCount >= 6
+        bool pass = (p >= requiredProgress) && (st <= maxStudyTogetherAllowed);
 
+        if (pass) yield return PlayUrlFull(successVideoURL);
+        else yield return PlayUrlFull(failureVideoURL);
+
+        // ✅ After result, go to Chapter2
         ShowHub(false);
         ShowVideo(false);
         isPlaying = false;
+
+        SceneManager.LoadScene(nextSceneName);
     }
 
     // ---------------- Video helpers ----------------
@@ -357,7 +365,6 @@ public class Chapter1TwoController : MonoBehaviour
     // ---------------- UI helpers ----------------
     void ShowVideo(bool show)
     {
-        if (videoRawImageObject != null) videoRawImageObject.SetActive(show);
         if (bgImageObject != null) bgImageObject.SetActive(!show);
     }
 
@@ -439,11 +446,5 @@ public class Chapter1TwoController : MonoBehaviour
             yield return new WaitForSecondsRealtime(pressPause);
             yield return new WaitForSecondsRealtime(loopDelay);
         }
-    }
-
-    // ---------------- MiniGame return helper ----------------
-    public static void MarkReturnedFromMiniGame()
-    {
-        returnedFromMiniGame = true;
     }
 }
