@@ -4,14 +4,22 @@ public class PlayerHit : MonoBehaviour
 {
     [Header("UI")]
     public GameObject gameOverPanel;
+    public GameObject doorButton;   // ✅ 加：Game Over 時顯示
 
     [Header("Score")]
-    public ScoreManager scoreManager;   // ← 加呢行
+    public ScoreManager scoreManager;
 
     [Header("Stop stuff (optional) - drag the COMPONENTS here")]
     public MonoBehaviour[] scriptsToDisable;
 
     bool isGameOver = false;
+
+    void Awake()
+    {
+        // ✅ 起步先收埋 Door（避免一開始見到）
+        if (doorButton != null) doorButton.SetActive(false);
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+    }
 
     void TriggerGameOver()
     {
@@ -21,7 +29,10 @@ public class PlayerHit : MonoBehaviour
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
 
-        if (scoreManager != null)        // ← 加呢行
+        if (doorButton != null)          // ✅ 加：show door
+            doorButton.SetActive(true);
+
+        if (scoreManager != null)
             scoreManager.StopScore();
 
         if (scriptsToDisable != null)

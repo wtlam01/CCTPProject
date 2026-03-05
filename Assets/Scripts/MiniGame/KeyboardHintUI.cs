@@ -1,63 +1,129 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
 public class KeyboardHintUI : MonoBehaviour
 {
-    [Header("UI Images")]
-    public Image upImage;
-    public Image downImage;
+    [Header("UI")]
+    public RectTransform upRect;     // UpHint (Image) RectTransform
+    public RectTransform downRect;   // DownHint (Image) RectTransform
+    public CanvasGroup hintGroup;    // CanvasGroup on KeyHint root (recommended)
 
-    [Header("Sprites")]
-    public Sprite upNormal;
-    public Sprite upPressed;
-    public Sprite downNormal;
-    public Sprite downPressed;
+    [Header("Auto Demo Loop (like SpaceHint)")]
+    public float pressDownScale = 0.88f;
+    public float pressDownTime  = 0.10f;
+    public float releaseTime    = 0.14f;
+    public float pressPause     = 0.55f;   // pause after one key press anim
+    public float loopDelay      = 0.25f;   // delay between up/down
 
-    [Header("Press Feel")]
-    [Range(0.8f, 1.0f)] public float pressedScale = 0.92f;
-    public float lerpSpeed = 14f;
+    [Header("Fade out when finished")]
+    public float fadeOutTime = 0.2f;
 
-    Vector3 upBaseScale;
-    Vector3 downBaseScale;
+    Coroutine loopCo;
+    bool stopped = false;
 
     void Awake()
     {
-        if (upImage) upBaseScale = upImage.rectTransform.localScale;
-        if (downImage) downBaseScale = downImage.rectTransform.localScale;
+        if (upRect != null) upRect.localScale = Vector3.one;
+        if (downRect != null) downRect.localScale = Vector3.one;
 
-        // set initial sprites
-        if (upImage && upNormal) upImage.sprite = upNormal;
-        if (downImage && downNormal) downImage.sprite = downNormal;
+        if (hintGroup != null)
+        {
+            hintGroup.alpha = 1f;
+            hintGroup.blocksRaycasts = false;
+            hintGroup.interactable = false;
+        }
     }
 
-    void Update()
+    void OnEnable()
     {
-        // If no keyboard (e.g., mobile), keep normal state
-        if (Keyboard.current == null)
-            return;
+        StartLoop();
+    }
 
-        bool upHeld = Keyboard.current.upArrowKey.isPressed;
-        bool downHeld = Keyboard.current.downArrowKey.isPressed;
+    void OnDisable()
+    {
+        StopLoop();
+    }
 
-        // swap sprites
-        if (upImage)
-            upImage.sprite = upHeld ? (upPressed ? upPressed : upNormal) : upNormal;
+    public void StartLoop()
+    {
+        stopped = false;
+        if (loopCo != null) StopCoroutine(loopCo);
+        loopCo = StartCoroutine(DemoLoop());
+    }
 
-        if (downImage)
-            downImage.sprite = downHeld ? (downPressed ? downPressed : downNormal) : downNormal;
+    public void StopLoop()
+    {
+        if (loopCo != null) StopCoroutine(loopCo);
+        loopCo = null;
 
-        // scale feel
-        if (upImage)
+        if (upRect != null) upRect.localScale = Vector3.one;
+        if (downRect != null) downRect.localScale = Vector3.one;
+    }
+
+    IEnumerator DemoLoop()
+    {
+        // loop: Up press -> Down press -> repeat
+        while (!stopped)
         {
-            Vector3 target = upHeld ? upBaseScale * pressedScale : upBaseScale;
-            upImage.rectTransform.localScale = Vector3.Lerp(upImage.rectTransform.localScale, target, Time.deltaTime * lerpSpeed);
+            if (upRect != null) yield return PressAnim(upRect);
+            yield return new WaitForSecondsRealtime(loopDelay);
+
+            if (downRect != null) yield return PressAnim(downRect);
+            yield return new WaitForSecondsRealtime(loopDelay);
+        }
+    }
+
+    IEnumerator PressAnim(RectTransform rect)
+    {
+        Vector3 baseScale = Vector3.one;
+        Vector3 downScale = baseScale * pressDownScale;
+
+        float t = 0f;
+        while (t < pressDownTime)
+        {
+            t += Time.unscaledDeltaTime;
+            rect.localScale = Vector3.Lerp(baseScale, downScale, t / pressDownTime);
+            yield return null;
+        }
+        rect.localScale = downScale;
+
+        t = 0f;
+        while (t < releaseTime)
+        {
+            t += Time.unscaledDeltaTime;
+            rect.localScale = Vector3.Lerp(downScale, baseScale, t / releaseTime);
+            yield return null;
+        }
+        rect.localScale = baseScale;
+
+        yield return new WaitForSecondsRealtime(pressPause);
+    }
+
+    // Call this when player pressed ↑ or ↓
+    public IEnumerator HideAndDisable()
+    {
+        stopped = true;
+        StopLoop();
+
+        if (hintGroup == null)
+        {
+            gameObject.SetActive(false);
+            yield break;
         }
 
-        if (downImage)
+        float start = hintGroup.alpha;
+        float t = 0f;
+
+        while (t < fadeOutTime)
         {
-            Vector3 target = downHeld ? downBaseScale * pressedScale : downBaseScale;
-            downImage.rectTransform.localScale = Vector3.Lerp(downImage.rectTransform.localScale, target, Time.deltaTime * lerpSpeed);
+            t += Time.unscaledDeltaTime;
+            hintGroup.alpha = Mathf.Lerp(start, 0f, Mathf.Clamp01(t / fadeOutTime));
+            yield return null;
         }
+
+        hintGroup.alpha = 0f;
+        gameObject.SetActive(false);
     }
 }
