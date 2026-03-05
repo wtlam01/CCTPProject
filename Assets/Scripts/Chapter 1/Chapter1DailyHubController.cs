@@ -14,8 +14,8 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;   // VideoRawImage GO (用來顯示/隱藏 video 畫面層)
-    public RawImage videoRawImage;           // 可留空；你而家 set None 先見到片都 OK
+    public GameObject videoRawImageObject;   // VideoRawImage GO
+    public RawImage videoRawImage;           // optional
 
     [Header("BG (show when video hidden)")]
     public GameObject bgImageObject;         // BG_Image GO
@@ -63,6 +63,13 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float pressPause = 0.70f;
     public float loopDelay = 0.50f;
 
+    [Header("Hint Rule")]
+    [Tooltip("✅ 只係第一次播放 Study 先需要 Hint")]
+    public bool studyHintOnlyFirstTime = true;
+
+    [Tooltip("✅ 第一次 Study 時：玩家按幾多次 Space 先收埋 Hint（例如 3）")]
+    public int hintHideAfterPresses = 3;
+
     [Header("Rest: swipe stops (first time only)")]
     public double restStop1 = 6.0;
     public double restStop2 = 10.0;
@@ -103,8 +110,11 @@ public class Chapter1DailyHubController : MonoBehaviour
     bool coffeeUnlocked = false;
     int restTimesChosen = 0;
 
-    // ✅ 你要：一旦玩家按過 Study，就永遠唔再出 Chat
+    // ✅ 一旦玩家按過 Study，就永遠唔再出 Chat
     bool chatLockedAfterStudy = false;
+
+    // ✅ 記住：Study hint 已經出過（之後再播 Study 就唔需要）
+    bool studyHintAlreadyShown = false;
 
     // study press tracking
     readonly Queue<float> pressTimes = new Queue<float>();
@@ -119,7 +129,6 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     void Awake()
     {
-        // VideoPlayer base
         if (videoPlayer != null)
         {
             videoPlayer.playOnAwake = false;
@@ -129,14 +138,11 @@ public class Chapter1DailyHubController : MonoBehaviour
             videoPlayer.Stop();
         }
 
-        // optional: raw image color
         if (videoRawImage != null) videoRawImage.color = Color.black;
 
-        // start state: show BG, hide video layer
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
-        // hook buttons
         if (studyButton != null)
         {
             studyButton.onClick.RemoveAllListeners();
@@ -155,12 +161,10 @@ public class Chapter1DailyHubController : MonoBehaviour
             chatButton.onClick.AddListener(OnChatClicked);
         }
 
-        // hints
         SetSpaceHintVisible(false);
         StopSpaceHintLoop();
         if (swipeAnim != null) swipeAnim.StopAndHide();
 
-        // blackout
         if (blackoutGroup != null)
         {
             blackoutGroup.alpha = 0f;
@@ -168,7 +172,6 @@ public class Chapter1DailyHubController : MonoBehaviour
             blackoutGroup.interactable = false;
         }
 
-        // wipe overlay
         if (wipeOverlay != null)
         {
             wipeOverlay.EndWipeHide();
@@ -176,7 +179,6 @@ public class Chapter1DailyHubController : MonoBehaviour
             wipeOverlay.OnFinished += OnOrangeWipeFinished;
         }
 
-        // ✅ 初始 Hub：Chat + Study；Coffee 未解鎖
         ApplyHubState(showHub: true);
     }
 
@@ -184,7 +186,6 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (!waitingSwipe) return;
 
-        // keyboard fallback
         if (Keyboard.current != null && Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             swipeTriggered = true;
@@ -215,8 +216,6 @@ public class Chapter1DailyHubController : MonoBehaviour
     void OnChatClicked()
     {
         if (isPlaying) return;
-
-        // 轉 scene 播 chat video
         SceneManager.LoadScene(chapter1twoSceneName);
     }
 
@@ -224,9 +223,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        // ✅ 一旦玩家按過 Study，就永遠鎖住 Chat
         chatLockedAfterStudy = true;
-
         StartCoroutine(StudyDayRoutine());
     }
 
@@ -303,7 +300,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         {
             yield return BlackoutRoutine(true);
             yield return PlayOverworkFireThenWipe(overworkURL);
-            yield break; // wipe flow ends by event
+            yield break;
         }
     }
 
@@ -328,7 +325,6 @@ public class Chapter1DailyHubController : MonoBehaviour
         while (videoPlayer != null && videoPlayer.isPlaying && videoPlayer.time < showAt)
             yield return null;
 
-        // wipe begins
         ForceHideAllOptions();
 
         if (videoPlayer != null) videoPlayer.Pause();
@@ -387,11 +383,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (videoPlayer == null) yield break;
 
-        // hide BG, show video layer
         if (bgImageObject != null) bgImageObject.SetActive(false);
         if (videoRawImageObject != null) videoRawImageObject.SetActive(true);
 
-        // optional: make sure black
         if (videoRawImage != null) videoRawImage.color = Color.black;
 
         videoPlayer.Stop();
@@ -454,7 +448,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // Study: press space -> speed
+    // -------------------- Study: Hint only first time --------------------
     IEnumerator PlayStudyWithSpace(string url)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
@@ -464,19 +458,33 @@ public class Chapter1DailyHubController : MonoBehaviour
         pressTimes.Clear();
         lastPressAt = Time.unscaledTime;
 
+        int pressCount = 0;
+
+        // ✅ 只係第一次先 show hint
+        bool shouldShowHintThisPlay = true;
+        if (studyHintOnlyFirstTime && studyHintAlreadyShown)
+            shouldShowHintThisPlay = false;
+
         videoPlayer.time = 0;
         videoPlayer.playbackSpeed = 0f;
         videoPlayer.Play();
         yield return WaitUntilVideoActuallyPlays(2f);
 
-        yield return new WaitForSecondsRealtime(hintShowDelay);
-        StartSpaceHintLoop();
+        if (shouldShowHintThisPlay)
+        {
+            yield return new WaitForSecondsRealtime(hintShowDelay);
+            StartSpaceHintLoop();
+        }
+        else
+        {
+            StopSpaceHintLoop();
+            SetSpaceHintVisible(false);
+        }
 
         double duration = videoPlayer.length;
         if (duration <= 0.01) duration = 12.0;
 
         float currentSpeed = 0f;
-        bool firstPress = false;
 
         while (videoPlayer.time < duration - endPadding)
         {
@@ -487,11 +495,16 @@ public class Chapter1DailyHubController : MonoBehaviour
                 pressTimes.Enqueue(Time.unscaledTime);
                 lastPressAt = Time.unscaledTime;
 
-                if (!firstPress)
+                if (shouldShowHintThisPlay)
                 {
-                    firstPress = true;
-                    StopSpaceHintLoop();
-                    SetSpaceHintVisible(false);
+                    pressCount++;
+
+                    // ✅ 第一次播放：按夠 N 次先收埋 hint（例如 3）
+                    if (pressCount >= hintHideAfterPresses)
+                    {
+                        StopSpaceHintLoop();
+                        SetSpaceHintVisible(false);
+                    }
                 }
             }
 
@@ -516,12 +529,16 @@ public class Chapter1DailyHubController : MonoBehaviour
         StopSpaceHintLoop();
         SetSpaceHintVisible(false);
 
+        // ✅ 一播完第一次 Study，就記住：以後唔再需要 hint
+        if (studyHintOnlyFirstTime)
+            studyHintAlreadyShown = true;
+
         if (videoPlayer != null) videoPlayer.Stop();
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // Rest: swipe stops
+    // -------------------- Rest: swipe stops --------------------
     IEnumerator PlayRestWithSwipeStops(string url, double stop1, double stop2)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
@@ -585,19 +602,14 @@ public class Chapter1DailyHubController : MonoBehaviour
             return;
         }
 
-        // 確保 panel keep active
         if (chatOptionGroup != null) chatOptionGroup.gameObject.SetActive(true);
         if (studyOptionGroup != null) studyOptionGroup.gameObject.SetActive(true);
         if (coffeeOptionGroup != null) coffeeOptionGroup.gameObject.SetActive(true);
 
-        // ✅ Chat：如果玩家按過 Study，就永遠唔再出
         bool showChat = !chatLockedAfterStudy;
         SetOptionVisible(chatOptionGroup, chatButton, showChat);
 
-        // ✅ Study 永遠顯示
         SetOptionVisible(studyOptionGroup, studyButton, true);
-
-        // ✅ Coffee 只係解鎖後出
         SetOptionVisible(coffeeOptionGroup, coffeeButton, coffeeUnlocked);
     }
 
