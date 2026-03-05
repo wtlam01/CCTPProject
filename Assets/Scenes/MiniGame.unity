@@ -1354,9 +1354,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorButtonController1
   doorImage: {fileID: 1253545907}
+  doorButton: {fileID: 1253545906}
   doorClosedSprite: {fileID: 5213229242370633579, guid: 93984225534904ed2b15589dddc4950f, type: 3}
   doorOpenSprite: {fileID: 4856990145134343996, guid: 644cd77d4d07248a7813c325aa4e7f79, type: 3}
   targetScene: Chapter1two
+  isLocked: 0
 --- !u!1 &1304889276
 GameObject:
   m_ObjectHideFlags: 0
@@ -1525,8 +1527,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverUIController
   gameOverPanel: {fileID: 1237084254}
-  doorButton: {fileID: 1253545905}
+  doorButtonGO: {fileID: 0}
   startPanel: {fileID: 0}
+  doorController: {fileID: 1253545911}
+  hubSceneName: Chapter1two
+  miniGameSceneName: MiniGame
+  lockOnRestartCount: 3
+  lockOnlyOneRun: 1
 --- !u!1 &1357424619
 GameObject:
   m_ObjectHideFlags: 0
