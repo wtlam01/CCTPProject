@@ -1,4 +1,3 @@
-// WipeToClearOverlay.cs
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,12 +10,15 @@ public class WipeToClearOverlay : MonoBehaviour
     public Graphic overlayGraphic;      // OrangeOverlay Image
     public CanvasGroup overlayGroup;    // OrangeOverlay CanvasGroup
 
+    [Header("Hint")]
+    public OrangeWipeFingerHint overlayHint;
+
     [Header("Mask Texture")]
     public int texSize = 512;
     public int brushRadiusPx = 24;
 
     [Range(0.05f, 0.99f)]
-    public float clearToFinish = 0.80f; // ✅ 80% default
+    public float clearToFinish = 0.80f; // 80% default
 
     [Header("Output")]
     public bool disableOnFinish = true;
@@ -32,6 +34,8 @@ public class WipeToClearOverlay : MonoBehaviour
     Material runtimeMat;
     bool wipingEnabled = false;
     bool finished = false;
+
+    bool hasHiddenHintAfterFirstDrag = false;
 
     // ratio cache
     float cachedClearedRatio = 0f;
@@ -63,10 +67,9 @@ public class WipeToClearOverlay : MonoBehaviour
         maskTex.filterMode = FilterMode.Bilinear;
 
         pixels = new Color32[texSize * texSize];
-        FillMask(255); // 255 = fully covered
+        FillMask(255); // fully covered
         ApplyMask();
 
-        // runtime material instance (avoid editing asset)
         if (overlayGraphic != null && overlayGraphic.material != null)
         {
             runtimeMat = new Material(overlayGraphic.material);
@@ -79,7 +82,6 @@ public class WipeToClearOverlay : MonoBehaviour
 
         if (runtimeMat != null)
         {
-            // shader expects _MaskTex
             runtimeMat.SetTexture("_MaskTex", maskTex);
         }
     }
@@ -107,6 +109,7 @@ public class WipeToClearOverlay : MonoBehaviour
 
         finished = false;
         wipingEnabled = true;
+        hasHiddenHintAfterFirstDrag = false;
 
         if (overlayGroup != null)
         {
@@ -119,11 +122,17 @@ public class WipeToClearOverlay : MonoBehaviour
         {
             gameObject.SetActive(true);
         }
+
+        if (overlayHint != null)
+            overlayHint.ShowAndPlay();
     }
 
     public void EndWipeHide()
     {
         wipingEnabled = false;
+
+        if (overlayHint != null)
+            overlayHint.HideAndStop();
 
         if (overlayGroup != null)
         {
@@ -155,7 +164,6 @@ public class WipeToClearOverlay : MonoBehaviour
         int cleared = 0;
         int total = pixels.Length;
 
-        // treat <= 10 as erased
         for (int i = 0; i < total; i++)
         {
             if (pixels[i].r <= 10) cleared++;
@@ -171,21 +179,32 @@ public class WipeToClearOverlay : MonoBehaviour
         if (!wipingEnabled) return;
         if (overlayRect == null || overlayGraphic == null) return;
 
+        bool paintedThisFrame = false;
+
         // mouse
         if (Mouse.current != null && Mouse.current.leftButton.isPressed)
         {
             Vector2 screen = Mouse.current.position.ReadValue();
-            TryPaintAtScreenPos(screen);
+            paintedThisFrame = TryPaintAtScreenPos(screen) || paintedThisFrame;
         }
 
         // touch
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.isPressed)
         {
             Vector2 screen = Touchscreen.current.primaryTouch.position.ReadValue();
-            TryPaintAtScreenPos(screen);
+            paintedThisFrame = TryPaintAtScreenPos(screen) || paintedThisFrame;
         }
 
-        // ✅ auto-finish when nearly clean
+        // ✅ first drag hides hint
+        if (paintedThisFrame && !hasHiddenHintAfterFirstDrag)
+        {
+            hasHiddenHintAfterFirstDrag = true;
+
+            if (overlayHint != null)
+                overlayHint.HideAndStop();
+        }
+
+        // auto-finish when nearly clean
         if (!finished && GetClearedRatio() >= clearToFinish)
         {
             finished = true;
@@ -195,26 +214,25 @@ public class WipeToClearOverlay : MonoBehaviour
         }
     }
 
-    void TryPaintAtScreenPos(Vector2 screenPos)
+    bool TryPaintAtScreenPos(Vector2 screenPos)
     {
-        // If your Canvas is Screen Space - Overlay, camera should be null.
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 overlayRect, screenPos, null, out Vector2 local))
-            return;
+            return false;
 
         Rect r = overlayRect.rect;
         float u = Mathf.InverseLerp(r.xMin, r.xMax, local.x);
         float v = Mathf.InverseLerp(r.yMin, r.yMax, local.y);
 
-        if (u < 0f || u > 1f || v < 0f || v > 1f) return;
+        if (u < 0f || u > 1f || v < 0f || v > 1f) return false;
 
         int x = Mathf.RoundToInt(u * (texSize - 1));
         int y = Mathf.RoundToInt(v * (texSize - 1));
 
-        PaintCircle(x, y, brushRadiusPx);
+        return PaintCircle(x, y, brushRadiusPx);
     }
 
-    void PaintCircle(int cx, int cy, int radius)
+    bool PaintCircle(int cx, int cy, int radius)
     {
         int r2 = radius * radius;
 
@@ -235,7 +253,6 @@ public class WipeToClearOverlay : MonoBehaviour
 
                 int idx = y * texSize + x;
 
-                // set to 0 => erased
                 if (pixels[idx].r != 0)
                 {
                     pixels[idx] = new Color32(0, 0, 0, 255);
@@ -249,5 +266,7 @@ public class WipeToClearOverlay : MonoBehaviour
             maskTex.SetPixels32(pixels);
             maskTex.Apply(false, false);
         }
+
+        return changed;
     }
 }

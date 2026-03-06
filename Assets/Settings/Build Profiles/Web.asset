@@ -343,7 +343,7 @@ MonoBehaviour:
     - line: '|   m_BuildTargetGraphicsJobMode: []'
     - line: '|   m_BuildTargetGraphicsAPIs: []'
     - line: '|   m_BuildTargetVRSettings: []'
-    - line: '|   m_DefaultShaderChunkSizeInMB: 16'
+    - line: '|   m_DefaultShaderChunkSizeInMB: 1500'
     - line: '|   m_DefaultShaderChunkCount: 0'
     - line: '|   openGLRequireES31: 0'
     - line: '|   openGLRequireES31AEP: 0'
@@ -752,7 +752,7 @@ MonoBehaviour:
     - rid: 2571121660711403520
       type: {class: WebGLPlatformSettings, ns: UnityEditor.WebGL, asm: UnityEditor.WebGL.Extensions}
       data:
-        m_Development: 1
+        m_Development: 0
         m_ConnectProfiler: 0
         m_BuildWithDeepProfilingSupport: 0
         m_AllowDebugging: 0

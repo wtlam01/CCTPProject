@@ -306,16 +306,17 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1949568321}
+  - {fileID: 1648050916}
   - {fileID: 627594686}
   - {fileID: 1887546454}
   - {fileID: 639274277}
   - {fileID: 1564364387}
-  - {fileID: 1648050916}
   - {fileID: 1156947298}
   - {fileID: 1400491278}
+  - {fileID: 1584740081}
+  - {fileID: 1073273067}
   - {fileID: 820086337}
   - {fileID: 514806528}
-  - {fileID: 1584740081}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -872,6 +873,121 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820086336}
   m_CullTransparentMesh: 1
+--- !u!1 &1073273064
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1073273067}
+  - component: {fileID: 1073273069}
+  - component: {fileID: 1073273068}
+  - component: {fileID: 1073273066}
+  - component: {fileID: 1073273065}
+  m_Layer: 5
+  m_Name: OverlayHint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &1073273065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073273064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 321f1d7120e11430facb3d088c058d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrangeWipeFingerHint
+  fingerRect: {fileID: 1073273067}
+  canvasGroup: {fileID: 1073273066}
+  p0: {x: -600, y: 200}
+  p1: {x: -300, y: -200}
+  p2: {x: 0, y: 200}
+  p3: {x: 300, y: -200}
+  p4: {x: 600, y: 200}
+  segmentDuration: 0.8
+  fadeDuration: 0.25
+  holdAtEnd: 0.15
+  loopDelay: 0.35
+  usePulse: 1
+  startScale: 1
+  pressScale: 0.9
+--- !u!225 &1073273066
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073273064}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!224 &1073273067
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073273064}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.99986035, y: 0.99986035, z: 0.99986035}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 114648162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.00015259, y: -0.62086}
+  m_SizeDelta: {x: 304.053, y: 296.168}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1073273068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073273064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -7164639588303836088, guid: e0145a96bc7b044c8a02557921abd3c1, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1073273069
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073273064}
+  m_CullTransparentMesh: 1
 --- !u!1 &1156947294
 GameObject:
   m_ObjectHideFlags: 0
@@ -1327,6 +1443,7 @@ MonoBehaviour:
   overlayRect: {fileID: 1584740081}
   overlayGraphic: {fileID: 1584740082}
   overlayGroup: {fileID: 1584740079}
+  overlayHint: {fileID: 1073273065}
   texSize: 512
   brushRadiusPx: 35
   clearToFinish: 0.8
