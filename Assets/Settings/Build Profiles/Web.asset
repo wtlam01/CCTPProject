@@ -343,7 +343,7 @@ MonoBehaviour:
     - line: '|   m_BuildTargetGraphicsJobMode: []'
     - line: '|   m_BuildTargetGraphicsAPIs: []'
     - line: '|   m_BuildTargetVRSettings: []'
-    - line: '|   m_DefaultShaderChunkSizeInMB: 1500'
+    - line: '|   m_DefaultShaderChunkSizeInMB: 2000'
     - line: '|   m_DefaultShaderChunkCount: 0'
     - line: '|   openGLRequireES31: 0'
     - line: '|   openGLRequireES31AEP: 0'
