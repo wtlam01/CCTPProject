@@ -23,7 +23,7 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     public GameObject fingerHintFallback;
 
     [Header("Fade To Black Overlay (between videos)")]
-    public CanvasGroup blackFadeGroup;          // BlackFadeOverlay 的 CanvasGroup
+    public CanvasGroup blackFadeGroup;
     public float fadeFromBlackDuration = 0.8f;
 
     [Header("Second -> Third Fade")]
@@ -37,7 +37,8 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     public GameObject emailImage;
 
     [Header("Video URLs")]
-    public string firstVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4";
+    public string preFirstVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/30IgNotice.mp4";   // ✅ 新增：先播呢條
+    public string firstVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4"; // ✅ 呢條仍然係 swipe video
     public string secondVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4";
     public string thirdVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/311street1.mp4";
 
@@ -70,7 +71,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             introOverlayGroup.interactable = true;
         }
 
-        // ✅ 重要：開場先黑住，避免第一下 prepare 閃背景
         if (blackFadeGroup != null)
         {
             blackFadeGroup.alpha = 1f;
@@ -93,8 +93,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         {
             videoPlayer.loopPointReached -= OnVideoFinished;
             videoPlayer.loopPointReached += OnVideoFinished;
-
-            // ✅ 減少「play 咗但第一幀未到」嘅閃
             videoPlayer.waitForFirstFrame = true;
         }
 
@@ -113,13 +111,12 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         SetTextHintVisible(false);
         HideFinger();
 
-        // ✅ 呢段時間可以由黑淡出，露返 sofa（視覺舒服）
+        // 黑淡出，露返 sofa
         if (blackFadeGroup != null)
             yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, 0.6f);
 
         yield return new WaitForSeconds(sofaShowTime);
 
-        // 播第一條：先黑住 prepare，再由黑淡出（完全避免 gap）
         if (sofaImage != null) sofaImage.SetActive(false);
         if (videoRawImage != null) videoRawImage.SetActive(true);
 
@@ -134,7 +131,8 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         hasShownHintOnce = false;
         switchingVideos = false;
 
-        yield return PlayVideoCovered(firstVideoURL, fadeFromBlack: true);
+        // ✅ 先播 notice，再播 scrolling phone
+        yield return StartCoroutine(PlayPreFirstThenFirst());
     }
 
     void Update()
@@ -142,10 +140,10 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         if (videoPlayer == null || !videoPlayer.isPrepared) return;
         if (switchingVideos) return;
 
+        // ✅ swipe stop 只作用喺 firstVideoURL（即 32Scrollingthephone）
         bool isFirstVideo = (videoPlayer.url == firstVideoURL);
         if (!isFirstVideo) return;
 
-        // 到停點就停
         if (!waitingForSwipe && stopIndex < stopTimes.Count)
         {
             if (videoPlayer.time >= stopTimes[stopIndex])
@@ -166,7 +164,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             }
         }
 
-        // 停住時等 swipe up
         if (waitingForSwipe)
             HandleSwipe_NewInputSystem();
     }
@@ -207,6 +204,13 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     {
         if (switchingVideos) return;
 
+        // ✅ pre-first 播完 -> 播 first
+        if (vp.url == preFirstVideoURL)
+        {
+            StartCoroutine(SwitchPreFirstToFirst());
+            return;
+        }
+
         if (vp.url == firstVideoURL)
         {
             if (stopIndex < stopTimes.Count) return;
@@ -220,13 +224,45 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             return;
         }
 
-        // 第二條播完 fallback（萬一 length 讀唔到）
         if (vp.url == secondVideoURL)
         {
             if (secondWatcherCo == null)
                 StartCoroutine(SwitchSecondToThird_Fallback());
             return;
         }
+    }
+
+    IEnumerator PlayPreFirstThenFirst()
+    {
+        switchingVideos = true;
+
+        waitingForSwipe = false;
+        isPressing = false;
+        HideFinger();
+        SetTextHintVisible(false);
+
+        // 先播 notice
+        yield return PlayVideoCovered(preFirstVideoURL, fadeFromBlack: true);
+
+        switchingVideos = false;
+    }
+
+    IEnumerator SwitchPreFirstToFirst()
+    {
+        switchingVideos = true;
+
+        waitingForSwipe = false;
+        isPressing = false;
+        HideFinger();
+        SetTextHintVisible(false);
+
+        stopIndex = 0;
+        hasShownHintOnce = false;
+
+        // 再播 scrolling phone（有 stop/swipe）
+        yield return PlayVideoCovered(firstVideoURL, fadeFromBlack: true);
+
+        switchingVideos = false;
     }
 
     IEnumerator SwitchToSecondVideo()
@@ -238,10 +274,8 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         HideFinger();
         SetTextHintVisible(false);
 
-        // ✅ 黑住換片，避免 gap
         yield return PlayVideoCovered(secondVideoURL, fadeFromBlack: true);
 
-        // ✅ 開始監察第二條：到尾 2 秒 -> fade -> 換第三條
         if (secondWatcherCo != null) StopCoroutine(secondWatcherCo);
         secondWatcherCo = StartCoroutine(WatchSecondAndFadeToThird());
 
@@ -250,7 +284,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
 
     IEnumerator WatchSecondAndFadeToThird()
     {
-        // 等到 length 可用（URL 有時慢）
         double length = videoPlayer.length;
         float timeout = 3f;
         while ((length <= 0.1 || double.IsNaN(length)) && timeout > 0f)
@@ -260,7 +293,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             yield return null;
         }
 
-        // 如果拎唔到 length，就唔做「尾段 fade」，等 loopPointReached fallback
         if (length <= 0.1 || double.IsNaN(length))
         {
             secondWatcherCo = null;
@@ -269,17 +301,14 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
 
         double fadeStartTime = System.Math.Max(0.0, length - secondFadeOutLastSeconds);
 
-        // 等到接近尾段
         while (videoPlayer.isPlaying && videoPlayer.time < fadeStartTime)
             yield return null;
 
         switchingVideos = true;
 
-        // ✅ 由片尾淡到全黑
         if (blackFadeGroup != null)
             yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 1f, fadeToBlackDuration);
 
-        // ✅ 黑住 prepare + 播第三條，再由黑淡出（避免 gap）
         yield return PlayVideoCovered(thirdVideoURL, fadeFromBlack: true);
 
         switchingVideos = false;
@@ -313,28 +342,21 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         switchingVideos = false;
     }
 
-    // =========================
-    // ✅ 核心：黑住 Prepare，等 texture ready 再淡出
-    // =========================
     IEnumerator PlayVideoCovered(string url, bool fadeFromBlack)
     {
         if (videoPlayer == null) yield break;
 
-        // 1) 先即刻黑（避免露底）
         if (blackFadeGroup != null)
             blackFadeGroup.alpha = 1f;
 
-        // 2) prepare 新片（黑住做）
         videoPlayer.Stop();
         videoPlayer.url = url;
         videoPlayer.Prepare();
         while (!videoPlayer.isPrepared) yield return null;
 
-        // 3) 播放
         videoPlayer.time = 0;
         videoPlayer.Play();
 
-        // 4) 等到真係有畫面（prepared 但 texture 未到會閃）
         float t = 0f;
         while (videoPlayer.texture == null && t < 2f)
         {
@@ -342,7 +364,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
             yield return null;
         }
 
-        // 5) 由黑淡出
         if (fadeFromBlack && blackFadeGroup != null)
             yield return FadeCanvasGroup(blackFadeGroup, blackFadeGroup.alpha, 0f, fadeFromBlackDuration);
     }
