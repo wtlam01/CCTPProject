@@ -21,6 +21,16 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
+    m_path: Assets/Scenes/HomePage.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Landing.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Chapter1.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/Chapter1two.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/MiniGame.unity
+  - m_enabled: 1
     m_path: Assets/Scenes/Chapter2.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
@@ -605,7 +615,7 @@ MonoBehaviour:
     - line: '|   webGLWasmArithmeticExceptions: 0'
     - line: '|   webGLLinkerTarget: 1'
     - line: '|   webGLThreadsSupport: 0'
-    - line: '|   webGLDecompressionFallback: 0'
+    - line: '|   webGLDecompressionFallback: 1'
     - line: '|   webGLInitialMemorySize: 32'
     - line: '|   webGLMaximumMemorySize: 2048'
     - line: '|   webGLMemoryGrowthMode: 2'
