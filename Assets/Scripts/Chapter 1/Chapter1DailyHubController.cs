@@ -11,15 +11,15 @@ public class Chapter1DailyHubController : MonoBehaviour
     [Header("Scene Names")]
     public string chapter1SceneName = "Chapter1";
     public string chapter1twoSceneName = "Chapter1two";
-    public string chapter2SceneName = "Chapter2"; // ✅ after result -> Chapter2
+    public string chapter2SceneName = "Chapter2"; // after result -> Chapter2
 
     [Header("Video Core")]
     public VideoPlayer videoPlayer;
-    public GameObject videoRawImageObject;   // VideoRawImage GO
-    public RawImage videoRawImage;           // optional
+    public GameObject videoRawImageObject;
+    public RawImage videoRawImage;
 
     [Header("BG (show when video hidden)")]
-    public GameObject bgImageObject;         // BG_Image GO
+    public GameObject bgImageObject;
 
     [Header("Hub UI (CanvasGroups on each option)")]
     public CanvasGroup chatOptionGroup;
@@ -36,12 +36,12 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float blackoutFadeOut = 0.35f;
 
     [Header("URLs")]
-    public string studyVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4";
-    public string restVideoURL   = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4";
-    public string overworkURL    = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4";
-    public string examURL        = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
-    public string successURL     = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
-    public string failureURL     = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
+    public string studyVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4";
+    public string restVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4";
+    public string overworkURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4";
+    public string examURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
+    public string successURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
+    public string failureURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
 
     [Header("Study: press rate -> playbackSpeed")]
     public float sampleWindowSeconds = 0.6f;
@@ -65,10 +65,10 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float loopDelay = 0.50f;
 
     [Header("Hint Rule")]
-    [Tooltip("✅ 只係第一次播放 Study 先需要 Hint")]
+    [Tooltip("只係第一次播放 Study 先需要 Hint")]
     public bool studyHintOnlyFirstTime = true;
 
-    [Tooltip("✅ 第一次 Study 時：玩家按幾多次 Space 先收埋 Hint（例如 3）")]
+    [Tooltip("第一次 Study 時：玩家按幾多次 Space 先收埋 Hint")]
     public int hintHideAfterPresses = 3;
 
     [Header("Rest: swipe stops (first time only)")]
@@ -87,24 +87,27 @@ public class Chapter1DailyHubController : MonoBehaviour
     public float swipeMaxTime = 0.6f;
 
     // ===================== NEW RESULT SYSTEM =====================
-    [Header("Hidden System (NO countdown shown)")]
+    [Header("Hidden System")]
     public int day = 1;
 
-    [Tooltip("✅ count how many times player chose Study")]
+    [Tooltip("Count how many times player chose Study")]
     public int studyCount = 0;
 
-    [Tooltip("✅ streak for overwork trigger (3 studies in a row)")]
+    [Tooltip("Streak for overwork trigger")]
     public int studyStreak = 0;
 
+    [Header("Choice System")]
+    public int totalChoices = 0;
+    public int maxChoices = 7;
+
     [Header("Day pacing")]
-    public int dayPerChoice = 2;   // Study/Rest both +2 days
-    public int finalDay = 15;      // exam at day >= 15 (8 choices)
+    public int dayPerChoice = 2;
 
     [Header("Balanced Success Rule")]
-    public int successStudyMin = 5; // success if studyCount == 5 or 6
-    public int successStudyMax = 6;
+    public int successStudyMin = 4; // pass if studyCount == 4 or 5
+    public int successStudyMax = 5;
 
-    // ===================== OVERWORK EFFECT (keep your original) =====================
+    // ===================== OVERWORK EFFECT =====================
     [Header("Overwork (trigger by streak)")]
     public int overworkTriggerStreak = 3;
 
@@ -121,18 +124,15 @@ public class Chapter1DailyHubController : MonoBehaviour
     bool chatLockedAfterStudy = false;
     bool studyHintAlreadyShown = false;
 
-    // study press tracking
     readonly Queue<float> pressTimes = new Queue<float>();
     float lastPressAt = -999f;
     Coroutine spaceHintCo;
 
-    // rest swipe state
     bool waitingSwipe = false;
     Vector2 swipeStartPos;
     float swipeStartTime;
     bool swipeTriggered = false;
 
-    // overwork runtime
     bool overworkPending = false;
 
     void Awake()
@@ -171,6 +171,7 @@ public class Chapter1DailyHubController : MonoBehaviour
 
         SetSpaceHintVisible(false);
         StopSpaceHintLoop();
+
         if (swipeAnim != null) swipeAnim.StopAndHide();
 
         if (blackoutGroup != null)
@@ -249,10 +250,10 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        // ✅ Study choice effects
         day += dayPerChoice;
         studyCount += 1;
         studyStreak += 1;
+        totalChoices += 1;
 
         yield return PlayStudyWithSpace(studyVideoURL);
 
@@ -270,9 +271,9 @@ public class Chapter1DailyHubController : MonoBehaviour
         isPlaying = true;
         ApplyHubState(showHub: false);
 
-        // ✅ Rest choice effects
         day += dayPerChoice;
         studyStreak = 0;
+        totalChoices += 1;
 
         restTimesChosen++;
 
@@ -291,11 +292,9 @@ public class Chapter1DailyHubController : MonoBehaviour
     // -------------------- System Check --------------------
     IEnumerator SystemCheckRoutine()
     {
-        // ✅ 1) Exam check first
-        if (day >= finalDay)
+        // 固定 7 次 choices 後 exam
+        if (totalChoices >= maxChoices)
         {
-            day = finalDay;
-
             yield return PlayUrlFull(examURL);
 
             bool pass = (studyCount >= successStudyMin && studyCount <= successStudyMax);
@@ -306,22 +305,18 @@ public class Chapter1DailyHubController : MonoBehaviour
             ApplyHubState(showHub: false);
             isPlaying = false;
 
-            // ✅ go Chapter2 after result
             SceneManager.LoadScene(chapter2SceneName);
             yield break;
         }
 
-        // ✅ 2) Overwork: 3 studies in a row
+        // 3 studies in a row -> overwork
         if (studyStreak >= overworkTriggerStreak)
         {
-            // lock so you don't double trigger
             studyStreak = 0;
             overworkPending = true;
 
             yield return BlackoutRoutine(true);
             yield return PlayOverworkFireThenWipe(overworkURL);
-
-            // After wipe finishes, OnOrangeWipeFinished() will restore UI + unlock control.
             yield break;
         }
 
@@ -367,12 +362,10 @@ public class Chapter1DailyHubController : MonoBehaviour
 
     void OnOrangeWipeFinished()
     {
-        // stop video + restore BG
         if (videoPlayer != null) videoPlayer.Stop();
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
         if (bgImageObject != null) bgImageObject.SetActive(true);
 
-        // optional: blackout off
         if (blackoutGroup != null)
         {
             blackoutGroup.alpha = 0f;
@@ -380,16 +373,12 @@ public class Chapter1DailyHubController : MonoBehaviour
             blackoutGroup.interactable = false;
         }
 
-        // ✅ keep your “something happened” effect (soft penalty)
-        // Here we only push time forward a bit to simulate lost time (hidden).
         if (overworkPending)
         {
             overworkPending = false;
 
-            // hidden consequence: lose 2 extra days
+            // hidden consequence: lose 1 extra choice worth of time
             day += dayPerChoice;
-
-            // DO NOT change studyCount (it should represent player decisions)
         }
 
         ApplyHubState(showHub: true);
@@ -416,7 +405,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         }
     }
 
-    // -------------------- Video Helpers (NO BG FLASH) --------------------
+    // -------------------- Video Helpers --------------------
     IEnumerator PrepareVideoNoBgFlash(string url)
     {
         if (videoPlayer == null) yield break;
@@ -486,7 +475,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // -------------------- Study: Hint only first time --------------------
+    // -------------------- Study --------------------
     IEnumerator PlayStudyWithSpace(string url)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
@@ -572,7 +561,7 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (bgImageObject != null) bgImageObject.SetActive(true);
     }
 
-    // -------------------- Rest: swipe stops --------------------
+    // -------------------- Rest --------------------
     IEnumerator PlayRestWithSwipeStops(string url, double stop1, double stop2)
     {
         if (string.IsNullOrEmpty(url) || videoPlayer == null) yield break;
