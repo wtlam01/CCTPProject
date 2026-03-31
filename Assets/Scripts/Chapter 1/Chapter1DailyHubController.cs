@@ -232,7 +232,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     {
         if (isPlaying) return;
 
-        chatLockedAfterStudy = true;
+        chatLockedAfterStudy = true; 
         StartCoroutine(StudyDayRoutine());
     }
 
