@@ -3,8 +3,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
+// scene management to load next scene at the end
 
 public class LandingSequenceToChapter1 : MonoBehaviour
+// controls the full landing sequence, plays videos in order, handles the wakeup loop, then loads chapter 1
 {
     [Header("Video")]
     public VideoPlayer videoPlayer;
@@ -14,36 +16,42 @@ public class LandingSequenceToChapter1 : MonoBehaviour
     public string firstVideoURL   = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
     public string wakeupVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/11wakeup.mp4";
     public string choicesVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/112Choices.mp4";
+    // three videos in order, wakeup is the one that loops until player clicks
 
     [Header("Wakeup Loop (seconds)")]
     public double loopStart = 0.0;
     public double loopEnd   = 15.0;
+    // manually loop between these timestamps instead of using unity built in loop
 
     [Header("Bubble Hotspot")]
     public GameObject bubbleHotspotObject;
     public Button bubbleButton;
+    // clickable hotspot that appears during wakeup loop
 
     [Header("Finger Hint")]
     public GameObject fingerHintObject;
     public ClickFingerHintAnimator fingerHintAnimator;
+    // animated finger hint showing player where to click
 
     [Header("CHAPTER 1 Overlay")]
-    public GameObject chapterTitleOverlayObject; // IntroOverlay
-    public CanvasGroup chapterTitleOverlayGroup; // CanvasGroup on IntroOverlay
+    public GameObject chapterTitleOverlayObject;
+    public CanvasGroup chapterTitleOverlayGroup;
     public float titleFadeInDuration = 0.8f;
     public float titleHoldDuration   = 1.2f;
     public float titleFadeOutDuration = 1.2f;
+    // chapter title fades in, holds, then fades out before scene loads
 
     [Header("Next Scene")]
     public string nextSceneName = "Chapter1";
+    // scene name to load after sequence finishes
 
     bool inLoop = false;
     bool clicked = false;
     bool titleShown = false;
+    // state flags to control the sequence flow
 
     void Awake()
     {
-        // Video baseline
         if (videoPlayer != null)
         {
             videoPlayer.playOnAwake = false;
@@ -51,20 +59,22 @@ public class LandingSequenceToChapter1 : MonoBehaviour
             videoPlayer.isLooping = false;
             videoPlayer.Stop();
         }
+        // make sure video doesnt auto play
 
         if (videoRawImageObject != null)
             videoRawImageObject.SetActive(true);
 
         SetHotspot(false);
         SetFinger(false);
+        // hide hotspot and finger hint at start
 
         if (bubbleButton != null)
         {
             bubbleButton.onClick.RemoveListener(OnBubbleClicked);
             bubbleButton.onClick.AddListener(OnBubbleClicked);
         }
+        // add click listener to bubble, remove first to avoid duplicates
 
-        // Title overlay default hidden (no flash)
         if (chapterTitleOverlayObject != null) chapterTitleOverlayObject.SetActive(true);
         if (chapterTitleOverlayGroup != null)
         {
@@ -72,28 +82,30 @@ public class LandingSequenceToChapter1 : MonoBehaviour
             chapterTitleOverlayGroup.blocksRaycasts = false;
             chapterTitleOverlayGroup.interactable = false;
         }
+        // title overlay starts invisible, no flash
 
-        // If IntroOverlay has Animator, disable it
         if (chapterTitleOverlayObject != null)
         {
             var anim = chapterTitleOverlayObject.GetComponent<Animator>();
             if (anim != null) anim.enabled = false;
         }
+        // disable animator if there is one, we handling the fade manually
     }
 
     IEnumerator Start()
     {
-        // 1) 1.mp4
         yield return PlayUrlAndWaitEnd(firstVideoURL);
+        // play opening video and wait for it to finish
 
-        // 2) wakeup loop until click
         yield return PlayUrlPreparedOnly(wakeupVideoURL);
+        // prepare wakeup video but dont wait for it to end, we controlling the loop manually
 
         inLoop = true;
         clicked = false;
 
         SetHotspot(true);
         SetFinger(true);
+        // show bubble and finger hint during the loop
 
         if (videoPlayer != null)
         {
@@ -110,11 +122,12 @@ public class LandingSequenceToChapter1 : MonoBehaviour
             }
             yield return null;
         }
+        // manually loop back to loopStart when we hit loopEnd, exits when player clicks
 
-        // continue from loopEnd to end
         inLoop = false;
         SetFinger(false);
         SetHotspot(false);
+        // hide hints once clicked
 
         if (videoPlayer != null)
         {
@@ -124,33 +137,37 @@ public class LandingSequenceToChapter1 : MonoBehaviour
 
         while (videoPlayer != null && videoPlayer.isPlaying)
             yield return null;
+        // play the rest of wakeup video from loopEnd to the actual end
 
-        // 3) choices
         yield return PlayUrlAndWaitEnd(choicesVideoURL);
+        // play choices video and wait for it to finish
 
-        // 4) SHOW CHAPTER 1, and TURN OFF VIDEO OUTPUT immediately
         yield return ShowTitleAndTurnOffVideo();
+        // show chapter 1 title then hide video
 
-        // 5) Load next scene
         SceneManager.LoadScene(nextSceneName);
+        // load chapter 1 scene
     }
 
     public void OnBubbleClicked()
     {
         if (!inLoop) return;
         clicked = true;
+        // only register click if we are currently in the loop
     }
 
     void SetHotspot(bool show)
     {
         if (bubbleHotspotObject != null) bubbleHotspotObject.SetActive(show);
         if (bubbleButton != null) bubbleButton.interactable = show;
+        // show or hide the clickable bubble hotspot
     }
 
     void SetFinger(bool show)
     {
         if (fingerHintObject != null) fingerHintObject.SetActive(show);
         if (fingerHintAnimator != null) fingerHintAnimator.enabled = show;
+        // show or hide the finger hint animator
     }
 
     IEnumerator PlayUrlPreparedOnly(string url)
@@ -164,32 +181,35 @@ public class LandingSequenceToChapter1 : MonoBehaviour
 
         videoPlayer.time = 0;
         videoPlayer.Play();
+        // prepare and start playing but dont wait for end, caller decides when to stop
     }
 
     IEnumerator PlayUrlAndWaitEnd(string url)
     {
         yield return PlayUrlPreparedOnly(url);
         while (videoPlayer != null && videoPlayer.isPlaying) yield return null;
+        // same as above but waits until video fully finishes
     }
 
     IEnumerator ShowTitleAndTurnOffVideo()
     {
         if (titleShown) yield break;
         titleShown = true;
+        // make sure this only runs once
 
         if (chapterTitleOverlayGroup == null)
             yield break;
 
-        // ✅ Kill the last video frame completely
         if (videoPlayer != null) videoPlayer.Stop();
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
+        // stop and hide video completely before showing title, avoids last frame flash
 
-        // Title fade in -> hold -> fade out
         chapterTitleOverlayGroup.alpha = 0f;
 
         yield return Fade(chapterTitleOverlayGroup, 0f, 1f, titleFadeInDuration);
         yield return new WaitForSecondsRealtime(titleHoldDuration);
         yield return Fade(chapterTitleOverlayGroup, 1f, 0f, titleFadeOutDuration);
+        // fade in, hold, fade out the chapter title
     }
 
     IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
@@ -202,6 +222,7 @@ public class LandingSequenceToChapter1 : MonoBehaviour
             cg.alpha = to;
             yield break;
         }
+        // snap instantly if duration is basically zero
 
         float t = 0f;
         while (t < duration)
@@ -212,5 +233,6 @@ public class LandingSequenceToChapter1 : MonoBehaviour
         }
 
         cg.alpha = to;
+        // reusable fade coroutine, same pattern used across all scripts
     }
 }

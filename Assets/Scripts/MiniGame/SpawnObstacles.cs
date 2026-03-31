@@ -1,27 +1,34 @@
 using UnityEngine;
 
 public class SpawnObstacles : MonoBehaviour
+// spawns obstacles at random y positions, speeds up over time, checks for overlaps before spawning
 {
     [Header("Prefab")]
     public GameObject obstaclePrefab;
+    // the obstacle prefab to instantiate
 
     [Header("Sprites (4 types)")]
     public Sprite[] obstacleSprites;
+    // randomly picks one of these sprites for each spawned obstacle
 
     [Header("Spawn Y Range")]
     public float minY = -4.5f;
     public float maxY = 4.5f;
+    // obstacles spawn anywhere within this vertical range
 
     [Header("Spawn Timing")]
     public float timeBetweenSpawns = 0.8f;
     public float minInterval = 0.25f;
+    // spawn interval shrinks over time but never goes below minInterval
 
     [Header("Anti-overlap")]
-    public float minDistanceY = 1.2f;   // 同一條 X 上，Y 最少距離
-    public int maxTries = 10;           // 最多試幾次搵位
-    public LayerMask obstacleLayer;     // 只檢查 obstacle layer（建議用）
+    public float minDistanceY = 1.2f;
+    public int maxTries = 10;
+    public LayerMask obstacleLayer;
+    // before spawning, checks nearby area to avoid obstacles overlapping each other
 
     float timer;
+    // counts up until next spawn
 
     void Update()
     {
@@ -31,8 +38,8 @@ public class SpawnObstacles : MonoBehaviour
             timer = 0f;
             SpawnOne();
 
-            // 例子：慢慢加快（你可以另外調）
             timeBetweenSpawns = Mathf.Max(minInterval, timeBetweenSpawns * 0.995f);
+            // 每次spawn之後間距縮短少少，慢慢加密obstacles
         }
     }
 
@@ -45,7 +52,6 @@ public class SpawnObstacles : MonoBehaviour
         {
             y = Random.Range(minY, maxY);
 
-            // 用 OverlapCircle 檢查附近有冇 obstacle（同一 X 附近）
             Vector2 checkPos = new Vector2(transform.position.x, y);
             float radius = minDistanceY * 0.5f;
 
@@ -56,12 +62,14 @@ public class SpawnObstacles : MonoBehaviour
                 break;
             }
         }
+        // try up to maxTries random positions, pick first one with no nearby obstacle
 
-        if (!found) return; // 搵唔到位就今次唔spawn
+        if (!found) return;
+        // 搵唔到合適位置就skip今次，唔好硬spawn
 
         GameObject obj = Instantiate(obstaclePrefab, new Vector3(transform.position.x, y, 0f), Quaternion.identity);
+        // spawn obstacle at chosen position
 
-        // 換 sprite（你已有 4 張）
         if (obstacleSprites != null && obstacleSprites.Length > 0)
         {
             var sr = obj.GetComponentInChildren<SpriteRenderer>() ?? obj.GetComponent<SpriteRenderer>();
@@ -70,13 +78,12 @@ public class SpawnObstacles : MonoBehaviour
                 sr.sprite = obstacleSprites[Random.Range(0, obstacleSprites.Length)];
             }
         }
-
-        // 如果你用 PolygonCollider + 需要 refresh collider（你已有 setup script 就唔理）
-        // obj.SendMessage("RefreshCollider", SendMessageOptions.DontRequireReceiver);
+        // randomly assign one of the 4 sprites, check children first then self
     }
 
     void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(transform.position, 0.2f);
+        // shows spawn point in scene view when selected, useful for positioning
     }
 }

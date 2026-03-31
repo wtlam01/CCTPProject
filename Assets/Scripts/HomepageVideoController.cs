@@ -3,25 +3,30 @@ using UnityEngine;
 using UnityEngine.Video;
 
 public class HomepageVideoController : MonoBehaviour
+// controls the homepage video sequence, icon plays first then switches to looping homepage video
 {
     [Header("References")]
     public VideoPlayer videoPlayer;
 
     [Header("UI (show when homepage starts)")]
     public GameObject[] uiToShowOnHomepage;
+    // all the UI elements to show after homepage video starts, like buttons etc
 
     [Header("Transition Cover (CanvasGroup on a full-screen black Image)")]
     public CanvasGroup blackCoverGroup;
-    public float fadeOutToBlack = 0.12f;   // 遮住最後一幀閃
+    public float fadeOutToBlack = 0.12f;
     public float fadeInFromBlack = 0.25f;
+    // black cover hides the flash between icon and homepage video switching
 
     [Header("URLs")]
     public string iconURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/Icon.mp4";
     public string homepageURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/homepage.mp4";
+    // icon plays once at start, homepage loops after
 
     void Reset()
     {
         if (videoPlayer == null) videoPlayer = GetComponent<VideoPlayer>();
+        // auto assign in editor when component first added
     }
 
     void Awake()
@@ -32,15 +37,18 @@ public class HomepageVideoController : MonoBehaviour
             videoPlayer.playOnAwake = false;
             videoPlayer.Stop();
         }
+        // make sure video doesnt auto play on its own
 
         SetUIVisible(false);
+        // hide all UI at start, show after homepage video begins
 
         if (blackCoverGroup != null)
         {
-            blackCoverGroup.alpha = 1f;          // 一開始先黑住，避免任何 flash
+            blackCoverGroup.alpha = 1f;
             blackCoverGroup.blocksRaycasts = true;
             blackCoverGroup.interactable = true;
         }
+        // black cover starts fully on to prevent any flash on first frame
     }
 
     IEnumerator Start()
@@ -53,36 +61,38 @@ public class HomepageVideoController : MonoBehaviour
 
         videoPlayer.loopPointReached -= OnVideoFinished;
         videoPlayer.loopPointReached += OnVideoFinished;
+        // subscribe to video end event, remove first to avoid duplicates
 
-        // 先播 icon
         yield return PlayURL(iconURL, loop: false);
+        // prepare and play icon video
 
-        // icon 開始後，淡出黑幕（顯示 icon）
         if (blackCoverGroup != null)
             yield return Fade(blackCoverGroup, 1f, 0f, fadeInFromBlack);
+        // fade out black to reveal icon video
     }
 
     void OnVideoFinished(VideoPlayer vp)
     {
         if (vp.url == iconURL)
             StartCoroutine(SwitchToHomepage_NoFlash());
+        // when icon ends, switch to homepage
     }
 
     IEnumerator SwitchToHomepage_NoFlash()
     {
-        // 1) 先淡入黑幕遮住最後一幀
         if (blackCoverGroup != null)
             yield return Fade(blackCoverGroup, blackCoverGroup.alpha, 1f, fadeOutToBlack);
+        // quickly fade to black to hide the last frame of icon before switching
 
-        // 2) 換 homepage + loop
         yield return PlayURL(homepageURL, loop: true);
+        // load and play homepage video on loop
 
-        // 3) 顯示 UI
         SetUIVisible(true);
+        // show UI now that homepage is playing
 
-        // 4) 淡出黑幕
         if (blackCoverGroup != null)
             yield return Fade(blackCoverGroup, 1f, 0f, fadeInFromBlack);
+        // fade black out to reveal homepage
     }
 
     IEnumerator PlayURL(string url, bool loop)
@@ -93,6 +103,7 @@ public class HomepageVideoController : MonoBehaviour
 
         videoPlayer.Prepare();
         while (!videoPlayer.isPrepared) yield return null;
+        // wait until video is fully prepared before playing
 
         videoPlayer.time = 0;
         videoPlayer.Play();
@@ -103,6 +114,7 @@ public class HomepageVideoController : MonoBehaviour
         if (uiToShowOnHomepage == null) return;
         foreach (var go in uiToShowOnHomepage)
             if (go != null) go.SetActive(visible);
+        // loop through all UI objects and show or hide them
     }
 
     IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
@@ -114,6 +126,7 @@ public class HomepageVideoController : MonoBehaviour
             cg.alpha = to;
             yield break;
         }
+        // if duration basically 0, just snap instantly
 
         float t = 0f;
         cg.alpha = from;
@@ -127,5 +140,6 @@ public class HomepageVideoController : MonoBehaviour
         }
 
         cg.alpha = to;
+        // reusable fade function, lerps alpha over time
     }
 }
