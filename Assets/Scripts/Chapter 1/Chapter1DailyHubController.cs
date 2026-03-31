@@ -42,6 +42,7 @@ public class Chapter1DailyHubController : MonoBehaviour
     public string examURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
     public string successURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
     public string failureURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
+    public string chatVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/231Chatwithfriend.mp4";
 
     [Header("Study: press rate -> playbackSpeed")]
     public float sampleWindowSeconds = 0.6f;
@@ -225,14 +226,14 @@ public class Chapter1DailyHubController : MonoBehaviour
     void OnChatClicked()
     {
         if (isPlaying) return;
-        SceneManager.LoadScene(chapter1twoSceneName);
+        StartCoroutine(ChatThenGoScene());
     }
 
     void OnStudyClicked()
     {
         if (isPlaying) return;
 
-        chatLockedAfterStudy = true; 
+        chatLockedAfterStudy = true;
         StartCoroutine(StudyDayRoutine());
     }
 
@@ -242,6 +243,18 @@ public class Chapter1DailyHubController : MonoBehaviour
         if (!coffeeUnlocked) return;
 
         StartCoroutine(RestDayRoutine());
+    }
+
+    // -------------------- Chat Flow --------------------
+    IEnumerator ChatThenGoScene()
+    {
+        isPlaying = true;
+        ApplyHubState(showHub: false);
+
+        yield return PlayUrlFull(chatVideoURL);
+
+        isPlaying = false;
+        SceneManager.LoadScene(chapter1twoSceneName);
     }
 
     // -------------------- Day Routines --------------------
