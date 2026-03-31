@@ -2,49 +2,61 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+// importing the usual stuff, TMPro is for the text mesh pro input field and text
 
 public class EmailOverlayController : MonoBehaviour
+// this whole script controls the email overlay, the typing, masking, send animation and what happens after
 {
     [Header("Root Group (static)")]
-    public RectTransform emailGroup;                 // EmailGroup（唔郁）
-    public CanvasGroup emailGroupCanvasGroup;        // 可留空，自動抓
+    public RectTransform emailGroup;
+    public CanvasGroup emailGroupCanvasGroup;
+    // emailGroup is the whole email UI, canvasgroup lets us control alpha and raycast blocking
 
     [Header("Panel to animate (move this only)")]
-    public RectTransform emailPanelObject;           // EmailPanel（要推上去嗰個）
+    public RectTransform emailPanelObject;
+    // this is the part that slides up when send is clicked, not the whole group
 
     [Header("Input")]
-    public TMP_InputField inputField;                // TMP InputField
-    public TMP_Text maskedDisplayText;               // MaskedText（你新建嘅 TMP_Text）
+    public TMP_InputField inputField;
+    public TMP_Text maskedDisplayText;
     public bool useXMask = true;
+    // inputField is where the player types, maskedDisplayText shows the x version on top
 
     [Tooltip("如果 true：打幾多字就顯示幾多個 x（保留換行）")]
     public bool maskMatchLength = true;
+    // if true the x count matches how many characters typed
 
     [Tooltip("如果 false：固定顯示 maskText（例如 xxxxxx）")]
     public string maskText = "xxxxxx";
+    // fallback fixed mask text if maskMatchLength is off
 
     [Header("True caret settings (TMP real cursor)")]
     public bool useTrueCaret = true;
     public Color caretColor = Color.black;
     public int caretWidth = 2;
+    // using the real TMP caret instead of a fake blinking one, looks more natural
 
     [Header("Optional caret blink (fake cursor)")]
-    public bool blinkCaret = false;                  // 建議關（你要真 caret）
+    public bool blinkCaret = false;
     public string caretChar = "|";
     public float caretBlinkSpeed = 0.5f;
+    // fake blinking cursor option, kept it off since we using real caret
 
     [Header("Send Button")]
     public Button sendButton;
+    // the button that triggers the send animation
 
     [Header("Slide Up Animation (panel only)")]
     public float slideUpDistance = 900f;
     public float slideDuration = 0.6f;
     public bool fadeOutPanel = true;
+    // controls how far and how fast the panel slides up, and whether it fades while sliding
 
     [Header("After Send -> Show Door")]
-    public GameObject doorButtonObject;              // 拖 DoorButton
-    public GameObject sofaImageObject;               // 拖 SofaImage
-    public GameObject videoRawImageObject;           // (可選) 拖 VideoRawImage
+    public GameObject doorButtonObject;
+    public GameObject sofaImageObject;
+    public GameObject videoRawImageObject;
+    // after email is sent, door appears, sofa shows, video hides
 
     CanvasGroup panelCg;
     Vector2 panelStartPos;
@@ -53,12 +65,14 @@ public class EmailOverlayController : MonoBehaviour
     bool sent = false;
 
     Coroutine caretRoutine;
+    // storing the real typed text separately so we can mask it
 
     void Awake()
     {
         if (emailGroup == null) emailGroup = GetComponent<RectTransform>();
         if (emailGroup != null && emailGroupCanvasGroup == null)
             emailGroupCanvasGroup = emailGroup.GetComponent<CanvasGroup>();
+        // auto grab components if i forgot to drag them in
 
         if (emailPanelObject != null)
         {
@@ -66,46 +80,46 @@ public class EmailOverlayController : MonoBehaviour
             if (panelCg == null) panelCg = emailPanelObject.gameObject.AddComponent<CanvasGroup>();
             panelStartPos = emailPanelObject.anchoredPosition;
         }
+        // save the panel starting position so we know where to slide from
 
-        // ✅ Door 一開始一定要收埋
         if (doorButtonObject != null) doorButtonObject.SetActive(false);
-
-        // ✅ Sofa 一開始唔好出（除非你想）
         if (sofaImageObject != null) sofaImageObject.SetActive(false);
+        // hide door and sofa at start, they show up later after send
 
         if (sendButton != null)
         {
             sendButton.onClick.RemoveListener(OnSendClicked);
             sendButton.onClick.AddListener(OnSendClicked);
         }
+        // add send button listener, remove first to avoid double calling
 
         if (inputField != null)
         {
-            // ✅ 你想真游標可以換行：InputField 要 MultiLineNewline
             inputField.lineType = TMP_InputField.LineType.MultiLineNewline;
+            // allow multiline input so enter key works
 
             inputField.onValueChanged.RemoveListener(OnInputChanged);
             inputField.onValueChanged.AddListener(OnInputChanged);
 
-            // 隱藏 InputField 自己顯示文字（保留可輸入）
             if (inputField.textComponent != null)
             {
                 var c = inputField.textComponent.color;
                 c.a = 0f;
                 inputField.textComponent.color = c;
             }
+            // hide the real input text so only the masked version shows
 
-            // 真 caret
             if (useTrueCaret)
             {
                 inputField.customCaretColor = true;
-                inputField.caretColor = caretColor;     // alpha 要 1
+                inputField.caretColor = caretColor;
                 inputField.caretWidth = caretWidth;
 
                 var sel = inputField.selectionColor;
                 sel.a = 0f;
                 inputField.selectionColor = sel;
             }
+            // set up the real caret color and hide selection highlight
         }
 
         UpdateMaskDisplay(false);
@@ -115,15 +129,14 @@ public class EmailOverlayController : MonoBehaviour
     {
         sent = false;
 
-        // EmailGroup 可互動
         if (emailGroupCanvasGroup != null)
         {
             emailGroupCanvasGroup.alpha = 1f;
             emailGroupCanvasGroup.blocksRaycasts = true;
             emailGroupCanvasGroup.interactable = true;
         }
+        // make sure email group is fully visible and interactable when it appears
 
-        // Reset panel
         if (emailPanelObject != null)
         {
             emailPanelObject.anchoredPosition = panelStartPos;
@@ -135,15 +148,17 @@ public class EmailOverlayController : MonoBehaviour
                 panelCg.interactable = true;
             }
         }
+        // reset panel position and visibility every time email shows up
 
-        // Door 每次 Email 出現都先收埋
         if (doorButtonObject != null) doorButtonObject.SetActive(false);
+        // always hide door when email opens
 
         realInput = "";
         if (inputField != null) inputField.text = "";
+        // clear the input field each time
 
-        // ✅ Email 出現就嘗試 focus（Editor 通常 OK；WebGL 可能仍需要玩家先點一下頁面）
         StartCoroutine(AutoFocusInputNextFrame());
+        // auto focus the input so player can type straight away
 
         StopCaret();
         if (blinkCaret) caretRoutine = StartCoroutine(CaretBlinkLoop());
@@ -153,6 +168,7 @@ public class EmailOverlayController : MonoBehaviour
     void OnDisable()
     {
         StopCaret();
+        // stop the fake caret when object disabled
     }
 
     IEnumerator AutoFocusInputNextFrame()
@@ -165,10 +181,10 @@ public class EmailOverlayController : MonoBehaviour
         inputField.Select();
         inputField.ActivateInputField();
 
-        // 再補一次
         yield return null;
         inputField.Select();
         inputField.ActivateInputField();
+        // doing it twice bc sometimes the first one doesnt stick, especially in webgl
     }
 
     void OnInputChanged(string current)
@@ -177,6 +193,7 @@ public class EmailOverlayController : MonoBehaviour
 
         realInput = current;
         UpdateMaskDisplay(false);
+        // every time input changes, update the masked display
     }
 
     void UpdateMaskDisplay(bool caretOn)
@@ -193,7 +210,6 @@ public class EmailOverlayController : MonoBehaviour
 
         if (maskMatchLength)
         {
-            // ✅ 保留換行，其他字變 x
             System.Text.StringBuilder sb = new System.Text.StringBuilder(realInput.Length);
             for (int i = 0; i < realInput.Length; i++)
             {
@@ -209,6 +225,7 @@ public class EmailOverlayController : MonoBehaviour
         {
             masked = string.IsNullOrEmpty(realInput) ? "" : maskText;
         }
+        // loop through each character, keep newlines as is, replace everything else with x
 
         maskedDisplayText.text = masked + (caretOn ? caretChar : "");
     }
@@ -223,6 +240,7 @@ public class EmailOverlayController : MonoBehaviour
             UpdateMaskDisplay(caretOn);
             yield return new WaitForSecondsRealtime(caretBlinkSpeed);
         }
+        // toggles fake caret on and off at set interval, stops when email is sent
     }
 
     void StopCaret()
@@ -232,6 +250,7 @@ public class EmailOverlayController : MonoBehaviour
             StopCoroutine(caretRoutine);
             caretRoutine = null;
         }
+        // stops the coroutine cleanly
     }
 
     public void OnSendClicked()
@@ -243,6 +262,7 @@ public class EmailOverlayController : MonoBehaviour
         UpdateMaskDisplay(false);
 
         StartCoroutine(SlideUpPanelAndThenShowDoor());
+        // when send clicked, stop caret and start the slide up animation
     }
 
     IEnumerator SlideUpPanelAndThenShowDoor()
@@ -260,6 +280,7 @@ public class EmailOverlayController : MonoBehaviour
             panelCg.blocksRaycasts = false;
             panelCg.interactable = false;
         }
+        // disable interaction on panel while its animating
 
         while (t < slideDuration)
         {
@@ -273,30 +294,22 @@ public class EmailOverlayController : MonoBehaviour
 
             yield return null;
         }
+        // lerp the panel upward and fade it out at the same time each frame
 
         emailPanelObject.anchoredPosition = to;
         if (fadeOutPanel && panelCg != null) panelCg.alpha = 0f;
+        // snap to final position just in case lerp didnt fully reach
 
-        // ✅ 推走 panel 後：顯示 Door
         if (doorButtonObject != null) doorButtonObject.SetActive(true);
-
-        // ✅ 令 Door click 一定有效：保證佢係可點（CanvasGroup 無 block 住）
-        // （EmailGroup 仲存在，但 DoorButton 喺 EmailGroup 之外，你而家 hierarchy 係 ok）
+        // show the door after panel finishes sliding up
     }
 
-    // ✅ 給 DoorButton 的 Button OnClick 呼叫（最穩）
     public void GoToSofa()
     {
-        // 顯示 sofa
         if (sofaImageObject != null) sofaImageObject.SetActive(true);
-
-        // 關掉影片（可選）
         if (videoRawImageObject != null) videoRawImageObject.SetActive(false);
-
-        // 收埋 Door
         if (doorButtonObject != null) doorButtonObject.SetActive(false);
-
-        // 收埋 Email 整組（你想 EmailBG 留低就改成只關 EmailPanel）
         if (emailGroup != null) emailGroup.gameObject.SetActive(false);
+        // called by door button, shows sofa, hides door and email group
     }
 }
