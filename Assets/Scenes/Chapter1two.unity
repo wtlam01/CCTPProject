@@ -456,56 +456,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!1 &167001744
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 167001746}
-  - component: {fileID: 167001745}
-  m_Layer: 0
-  m_Name: Chapter1TwoGameState
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &167001745
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 167001744}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 568fd313f79a7455db601d356907f754, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Chapter1TwoGameState
-  day: 0
-  progress: 0
-  studyTogetherCount: 0
-  restartCount: 0
-  returnedFromMiniGame: 0
-  studyHintAlreadyShown: 0
---- !u!4 &167001746
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 167001744}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 471.09744, y: 208.50307, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &639274276
 GameObject:
   m_ObjectHideFlags: 0
@@ -1314,10 +1264,8 @@ MonoBehaviour:
   examVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4
   successVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4
   failureVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4
-  MAX_DAYS: 21
-  dayPerChoice: 3
-  requiredProgress: 4
-  maxStudyTogetherAllowed: 5
+  MAX_DAYS: 7
+  dayPerChoice: 1
   sampleWindowSeconds: 0.6
   maxPressesPerSecond: 8
   maxPlaybackSpeed: 5
@@ -1368,6 +1316,7 @@ MonoBehaviour:
   progress: 0
   studyTogetherCount: 0
   restartCount: 0
+  playCount: 0
   returnedFromMiniGame: 0
   studyHintAlreadyShown: 0
 --- !u!4 &1777495573
@@ -1634,4 +1583,3 @@ SceneRoots:
   - {fileID: 1743448164}
   - {fileID: 1502551104}
   - {fileID: 1777495573}
-  - {fileID: 167001746}
