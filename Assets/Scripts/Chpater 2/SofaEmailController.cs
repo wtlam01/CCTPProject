@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class SofaEmailController : MonoBehaviour
 {
@@ -68,6 +69,10 @@ public class SofaEmailController : MonoBehaviour
     public TMP_Text endScreenText;
     [TextArea] public string endMessage = "";
 
+    [Header("Return To Home")]
+    public string homeSceneName = "HomePage";
+    public float returnToHomeDelay = 8f;
+
     State state = State.Sofa;
 
     // Drag gate
@@ -86,8 +91,9 @@ public class SofaEmailController : MonoBehaviour
     Coroutine pauseCo;
     Coroutine showUiCo;
     Coroutine playCo;
+    Coroutine returnHomeCo;
 
-    int emailCompleteCount = 0;     // ✅ CheckEmail 播完先 +1
+    int emailCompleteCount = 0;       // ✅ CheckEmail 播完先 +1
     bool emailHasFadedInOnce = false; // ✅ Email 只 fade 第一次
 
     void Awake()
@@ -489,6 +495,8 @@ public class SofaEmailController : MonoBehaviour
 
     void ShowEndScreen()
     {
+        if (state == State.Ending) return;
+
         state = State.Ending;
 
         if (videoPlayer != null) videoPlayer.Stop();
@@ -499,6 +507,15 @@ public class SofaEmailController : MonoBehaviour
 
         if (endScreenPanel != null)
             endScreenPanel.SetActive(true);
+
+        if (returnHomeCo != null) StopCoroutine(returnHomeCo);
+        returnHomeCo = StartCoroutine(ReturnHomeAfterDelay());
+    }
+
+    IEnumerator ReturnHomeAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(returnToHomeDelay);
+        SceneManager.LoadScene(homeSceneName);
     }
 
     void PlayUrl(string url, bool loop, float startTimeSeconds)

@@ -2683,6 +2683,8 @@ MonoBehaviour:
   endScreenPanel: {fileID: 2119913313}
   endScreenText: {fileID: 1352337455}
   endMessage: 
+  homeSceneName: HomePage
+  returnToHomeDelay: 6
 --- !u!1 &1619864100
 GameObject:
   m_ObjectHideFlags: 0
