@@ -13,9 +13,9 @@ public class LandingSequenceToChapter1 : MonoBehaviour
     public GameObject videoRawImageObject;
 
     [Header("URLs")]
-    public string firstVideoURL   = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
-    public string wakeupVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/11wakeup.mp4";
-    public string choicesVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/112Choices.mp4";
+    public string firstVideoURL   = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/1.mp4";
+    public string wakeupVideoURL  = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/11wakeup.mp4";
+    public string choicesVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/112Choices.mp4";
     // three videos in order, wakeup is the one that loops until player clicks
 
     [Header("Wakeup Loop (seconds)")]

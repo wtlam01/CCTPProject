@@ -1259,11 +1259,11 @@ MonoBehaviour:
   optionPlayGroup: {fileID: 1887546455}
   studyButton: {fileID: 639274279}
   playButton: {fileID: 1887546456}
-  studyTogetherURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/233Studying4ogether.mp4
-  peerInfluenceURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/232PeerInfluence1.mp4
-  examVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4
-  successVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4
-  failureVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4
+  studyTogetherURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/233StudyingTogether.mp4
+  peerInfluenceURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/232PeerInfluence.mp4
+  examVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/24Exam.mp4
+  successVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/25academicsuccess.mp4
+  failureVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/26Failure.mp4
   MAX_DAYS: 7
   dayPerChoice: 1
   sampleWindowSeconds: 0.6

@@ -1008,9 +1008,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LandingSequenceToChapter1
   videoPlayer: {fileID: 1502551103}
   videoRawImageObject: {fileID: 1648050913}
-  firstVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4
-  wakeupVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/11wakeup.mp4
-  choicesVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/112Choices.mp4
+  firstVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/1.mp4
+  wakeupVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/11wakeup.mp4
+  choicesVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/112Choices.mp4
   loopStart: 0
   loopEnd: 15
   bubbleHotspotObject: {fileID: 1291338798}

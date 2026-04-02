@@ -43,10 +43,10 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
     // after the last video finishes, show the email UI
 
     [Header("Video URLs")]
-    public string preFirstVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/30IgNotice.mp4";
-    public string firstVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4";
-    public string secondVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4";
-    public string thirdVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/311street1.mp4";
+    public string preFirstVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/30IgNotice.mp4";
+    public string firstVideoURL  = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/32Scrollingthephone.mp4";
+    public string secondVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/322StressOverload.mp4";
+    public string thirdVideoURL  = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/311street1.mp4";
     // four videos in order, pre-first plays once then goes into the swipeable first video
 
     [Header("Stop Times (seconds) for FIRST video only")]

@@ -24,9 +24,9 @@ public class SofaEmailController : MonoBehaviour
     // lets us pause another script while sofa mode is active, avoid conflicts
 
     [Header("URLs")]
-    public string sofaVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4";
-    public string checkEmailURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/32CheckEmail.mp4";
-    public string doNothingURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/33DoNth.mp4";
+    public string sofaVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/3OnSofa.mp4";
+    public string checkEmailURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/32CheckEmail.mp4";
+    public string doNothingURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/33DoNth.mp4";
     // three videos, sofa loops, check email plays on click, do nothing plays on exit
 
     [Header("DoNothing Start Time")]

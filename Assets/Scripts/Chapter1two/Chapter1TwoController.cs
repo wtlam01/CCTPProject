@@ -34,14 +34,14 @@ public class Chapter1TwoController : MonoBehaviour
     // two choice buttons with canvas groups for show/hide
 
     [Header("URLs")]
-    public string studyTogetherURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/233Studying4ogether.mp4";
-    public string peerInfluenceURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/232PeerInfluence1.mp4";
+    public string studyTogetherURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/233StudyingTogether.mp4";
+    public string peerInfluenceURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/232PeerInfluence.mp4";
     // study video uses space mash mechanic, peer influence plays before mini game
 
     [Header("Exam / Result URLs")]
-    public string examVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
-    public string successVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
-    public string failureVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
+    public string examVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/24Exam.mp4";
+    public string successVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/25academicsuccess.mp4";
+    public string failureVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/26Failure.mp4";
     // exam plays after max days, then either success or failure based on progress
 
     [Header("System")]

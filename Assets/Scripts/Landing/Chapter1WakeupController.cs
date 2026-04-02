@@ -47,11 +47,11 @@ public class Chapter1WakeupController : MonoBehaviour
             videoPlayer.Stop();
         }
 
-        // ✅ 片一開始就要見到畫面：RawImage 保持開
+        // 片一開始就要見到畫面：RawImage 保持開
         if (videoRawImageObject != null)
             videoRawImageObject.SetActive(true);
 
-        // ✅ End overlay 一開始唔顯示
+        // End overlay 一開始唔顯示
         if (endOverlayObject != null) endOverlayObject.SetActive(false);
         if (endOverlayGroup != null)
         {

@@ -43,13 +43,13 @@ public class Chapter1DailyHubController : MonoBehaviour
     // black overlay used for dramatic transitions, fades in holds then fades out
 
     [Header("URLs")]
-    public string studyVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4";
-    public string restVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4";
-    public string overworkURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4";
-    public string examURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4";
-    public string successURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4";
-    public string failureURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4";
-    public string chatVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/231Chatwithfriend.mp4";
+    public string studyVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/2Studying.mp4";
+    public string restVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/23Resting.mp4";
+    public string overworkURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/21Fire.mp4";
+    public string examURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/24Exam.mp4";
+    public string successURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/25academicsuccess.mp4";
+    public string failureURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/26Failure.mp4";
+    public string chatVideoURL = "https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/231Chatwithfriend.mp4";
     // all the video urls, different videos play depending on what player chooses
 
     [Header("Study: press rate -> playbackSpeed")]

@@ -1745,12 +1745,13 @@ MonoBehaviour:
   blackoutFadeIn: 0.35
   blackoutHold: 0.7
   blackoutFadeOut: 0.35
-  studyVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/2Studying.mp4
-  restVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/23Resting.mp4
-  overworkURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/21Fire.mp4
-  examURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/24Exam.mp4
-  successURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/25academicsuccess.mp4
-  failureURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/26Failure.mp4
+  studyVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/2Studying.mp4
+  restVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/23Resting.mp4
+  overworkURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/21Fire.mp4
+  examURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/24Exam.mp4
+  successURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/25academicsuccess.mp4
+  failureURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/26Failure.mp4
+  chatVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/231Chatwithfriend.mp4
   sampleWindowSeconds: 0.6
   maxPressesPerSecond: 8
   maxPlaybackSpeed: 5

@@ -2626,10 +2626,10 @@ MonoBehaviour:
   secondFadeOutLastSeconds: 2
   fadeToBlackDuration: 2
   emailImage: {fileID: 1666140576}
-  preFirstVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/30IgNotice.mp4
-  firstVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/32Scrollingthephone.mp4
-  secondVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/322StressOverload.mp4
-  thirdVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/311street1.mp4
+  preFirstVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/30IgNotice.mp4
+  firstVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/32Scrollingthephone.mp4
+  secondVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/322StressOverload.mp4
+  thirdVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/311street1.mp4
   stopTimes:
   - 1.8
   - 3.8
@@ -2655,9 +2655,9 @@ MonoBehaviour:
   videoRawImageObject: {fileID: 1285585903}
   videoCanvasGroup: {fileID: 0}
   flowScriptToDisable: {fileID: 0}
-  sofaVideoURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/3OnSofa.mp4
-  checkEmailURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/32CheckEmail.mp4
-  doNothingURL: https://w33lam.panel.uwe.ac.uk/CCTPVideo/33DoNth.mp4
+  sofaVideoURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/3OnSofa.mp4
+  checkEmailURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/32CheckEmail.mp4
+  doNothingURL: https://wtlam01.github.io/Poppion_CCTPUnityProject/videos/33DoNth.mp4
   doNothingStartAtSeconds: 2
   emailButtonObject: {fileID: 1470072820}
   emailButton: {fileID: 1470072824}
