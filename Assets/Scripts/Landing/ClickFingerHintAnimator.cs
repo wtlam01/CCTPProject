@@ -1,7 +1,7 @@
-// Control click提示嘅手指動畫，手指由右向左滑動，有fade in/out同埋tap pulse效果
-// loop直到被disable，用嚟提示玩家click bubble hotspot
-// This script animates a finger hint that slides right to left with fade and a subtle tap pulse,
-// looping until disabled externally to show the player where to click.
+// 控制click提示嘅手指動畫，手指停喺原位fade in/out同埋tap pulse效果
+// tap到底嗰一刻會有白色半透明圓形放大然後消失嘅ripple effect，loop直到被disable
+// This script animates a stationary finger hint with fade, tap pulse, and a white ripple circle
+// that expands and fades out at the moment the finger reaches the bottom of its tap, looping until disabled externally.
 
 using System.Collections;
 using UnityEngine;
@@ -10,16 +10,8 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 // unity will auto add these components if missing
 public class ClickFingerHintAnimator : MonoBehaviour
-// animates a finger hint that moves right to left, fades in and out, with a little pulse tap effect
+// animates a finger hint with tap pulse and ripple effect, no movement
 {
-    [Header("Move (Right -> Left)")]
-    public RectTransform fingerRect;
-    public Vector2 offsetFrom = new Vector2(60f, 0f);
-    public Vector2 offsetTo   = new Vector2(0f, 0f);
-    public float moveDuration = 0.6f;
-    public float holdTime     = 0.15f;
-    // finger starts 60 units to the right and slides left to center
-
     [Header("Fade")]
     public CanvasGroup canvasGroup;
     public float fadeInDuration  = 0.15f;
@@ -31,7 +23,18 @@ public class ClickFingerHintAnimator : MonoBehaviour
     public float pulseScale = 0.92f;
     public float pulseDuration = 0.16f;
     public float pulseDelay = 0.25f;
-    // small scale down then back up to simulate a tap, makes it feel more interactive
+    // small scale down then back up to simulate a tap
+
+    [Header("Ripple")]
+    public RectTransform rippleRect;
+    // drag the RippleCircle Image RectTransform here
+    public CanvasGroup rippleCanvasGroup;
+    // drag the RippleCircle CanvasGroup here
+    public float rippleStartSize = 60f;
+    public float rippleEndSize = 200f;
+    public float rippleDuration = 0.4f;
+    public float rippleStartAlpha = 0.5f;
+    // white circle expands and fades out when finger hits bottom of tap
 
     [Header("Loop")]
     public float loopGap = 0.15f;
@@ -44,17 +47,20 @@ public class ClickFingerHintAnimator : MonoBehaviour
 
     void Awake()
     {
-        if (fingerRect == null) fingerRect = GetComponent<RectTransform>();
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
 
         baseScale = transform.localScale;
-        basePos = fingerRect.anchoredPosition;
+        basePos = GetComponent<RectTransform>().anchoredPosition;
 
         canvasGroup.alpha = 0f;
         // start invisible
 
+        if (rippleCanvasGroup != null) rippleCanvasGroup.alpha = 0f;
+        if (rippleRect != null) rippleRect.sizeDelta = Vector2.one * rippleStartSize;
+        // hide ripple at start
+
         enabled = false;
-        // disabled by default, only starts when enabled externally by the wakeup controller
+        // disabled by default, only starts when enabled externally
     }
 
     void OnEnable()
@@ -67,8 +73,10 @@ public class ClickFingerHintAnimator : MonoBehaviour
     {
         if (co != null) StopCoroutine(co);
         canvasGroup.alpha = 0f;
-        fingerRect.anchoredPosition = basePos;
         transform.localScale = baseScale;
+
+        if (rippleCanvasGroup != null) rippleCanvasGroup.alpha = 0f;
+        if (rippleRect != null) rippleRect.sizeDelta = Vector2.one * rippleStartSize;
         // clean up and reset when disabled
     }
 
@@ -76,64 +84,27 @@ public class ClickFingerHintAnimator : MonoBehaviour
     {
         while (true)
         {
-            fingerRect.anchoredPosition = basePos + offsetFrom;
             transform.localScale = baseScale;
-            // reset to starting position before each cycle
 
-            yield return Fade(0f, 1f, fadeInDuration);
-            // fade in
+            yield return Fade(canvasGroup, 0f, 1f, fadeInDuration);
+            // fade in finger
 
-            yield return Move(basePos + offsetFrom, basePos + offsetTo, moveDuration);
-            // slide from right to left
-
-            yield return new WaitForSecondsRealtime(holdTime);
-            // brief pause at destination
+            yield return new WaitForSecondsRealtime(pulseDelay);
+            // brief pause before tap
 
             if (enablePulse)
-            {
-                yield return new WaitForSecondsRealtime(pulseDelay);
-                yield return Pulse();
-            }
-            // do the tap pulse if enabled
+                yield return PulseWithRipple();
+            // tap with ripple at the moment finger hits bottom
 
-            yield return Fade(1f, 0f, fadeOutDuration);
-            // fade out
+            yield return Fade(canvasGroup, 1f, 0f, fadeOutDuration);
+            // fade out finger
 
             yield return new WaitForSecondsRealtime(loopGap);
             // gap before repeating
         }
     }
 
-    IEnumerator Move(Vector2 from, Vector2 to, float duration)
-    {
-        float t = 0f;
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            fingerRect.anchoredPosition = Vector2.Lerp(from, to, t / duration);
-            yield return null;
-        }
-        fingerRect.anchoredPosition = to;
-        // lerp position from right to left over duration
-    }
-
-    IEnumerator Fade(float from, float to, float duration)
-    {
-        if (duration <= 0.0001f) { canvasGroup.alpha = to; yield break; }
-
-        float t = 0f;
-        canvasGroup.alpha = from;
-        while (t < duration)
-        {
-            t += Time.unscaledDeltaTime;
-            canvasGroup.alpha = Mathf.Lerp(from, to, t / duration);
-            yield return null;
-        }
-        canvasGroup.alpha = to;
-        // reusable fade, snaps instantly if duration is near zero
-    }
-
-    IEnumerator Pulse()
+    IEnumerator PulseWithRipple()
     {
         Vector3 from = baseScale;
         Vector3 to = baseScale * pulseScale;
@@ -145,7 +116,11 @@ public class ClickFingerHintAnimator : MonoBehaviour
             transform.localScale = Vector3.Lerp(from, to, t / pulseDuration);
             yield return null;
         }
-        // scale down first half
+        transform.localScale = to;
+        // finger fully pressed down
+
+        StartCoroutine(RippleEffect());
+        // circle appears exactly when finger hits bottom of tap
 
         t = 0f;
         while (t < pulseDuration)
@@ -154,8 +129,50 @@ public class ClickFingerHintAnimator : MonoBehaviour
             transform.localScale = Vector3.Lerp(to, from, t / pulseDuration);
             yield return null;
         }
-
         transform.localScale = baseScale;
-        // scale back up second half, gives a squeeze tap feel
+        // finger bounces back up
+    }
+
+    IEnumerator RippleEffect()
+    {
+        if (rippleRect == null || rippleCanvasGroup == null) yield break;
+
+        rippleRect.sizeDelta = Vector2.one * rippleStartSize;
+        rippleCanvasGroup.alpha = rippleStartAlpha;
+        // reset ripple to start state
+
+        float t = 0f;
+        while (t < rippleDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float p = Mathf.Clamp01(t / rippleDuration);
+
+            rippleRect.sizeDelta = Vector2.one * Mathf.Lerp(rippleStartSize, rippleEndSize, p);
+            rippleCanvasGroup.alpha = Mathf.Lerp(rippleStartAlpha, 0f, p);
+            // expand circle and fade out at same time
+
+            yield return null;
+        }
+
+        rippleCanvasGroup.alpha = 0f;
+        rippleRect.sizeDelta = Vector2.one * rippleStartSize;
+        // reset after done
+    }
+
+    IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
+    {
+        if (cg == null) yield break;
+        if (duration <= 0.0001f) { cg.alpha = to; yield break; }
+
+        float t = 0f;
+        cg.alpha = from;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Lerp(from, to, t / duration);
+            yield return null;
+        }
+        cg.alpha = to;
+        // reusable fade coroutine
     }
 }
