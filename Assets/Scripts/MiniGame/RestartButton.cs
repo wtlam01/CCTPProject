@@ -1,3 +1,6 @@
+// 控制restart按鈕，每次restart都會check日數，如果去到上限就返hub觸發考試，否則reload mini game
+// This script handles the restart button, checking if the day limit is reached after each retry and returning to the hub for the exam if so, otherwise reloading the mini game.
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 

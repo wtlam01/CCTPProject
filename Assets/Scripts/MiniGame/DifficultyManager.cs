@@ -1,3 +1,6 @@
+// 係全局嘅難度管理器，遊戲速度會隨時間慢慢增加，其他script讀取呢度嘅speed值
+// This script is a global difficulty manager that gradually increases game speed over time, read by obstacle and background scripts.
+
 using UnityEngine;
 
 public class DifficultyManager : MonoBehaviour

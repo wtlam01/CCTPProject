@@ -1,3 +1,8 @@
+// 控制overwork wipe效果入面嘅手指提示動畫，手指會沿住M形路徑移動
+// 提示玩家用手指喺橙色overlay上面抹嚟抹去，loop直到玩家開始wipe先停
+// This script animates a finger hint that traces an M-shaped path across the screen,
+// used during the overwork orange wipe overlay to show the player how to wipe the screen.
+
 using System.Collections;
 using UnityEngine;
 

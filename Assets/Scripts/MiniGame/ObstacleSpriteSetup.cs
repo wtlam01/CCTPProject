@@ -1,3 +1,6 @@
+// 負責幫障礙物換sprite同埋強制rebuild PolygonCollider2D去match新sprite嘅形狀
+// This script applies a sprite to an obstacle and forces the polygon collider to rebuild by toggling it, since it doesnt auto update on sprite change.
+
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]

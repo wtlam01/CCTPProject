@@ -1,3 +1,6 @@
+// 控制背景無限scroll效果，背景向左移動，去到指定位置就即刻teleport返右邊，make loop感覺
+// This script creates an infinite scrolling background by moving left and snapping back to the right when it goes too far
+
 using UnityEngine;
 
 public class BackgroundLooper : MonoBehaviour

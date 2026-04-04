@@ -1,3 +1,6 @@
+// 處理玩家撞到障礙物嘅邏輯，觸發game over畫面、停止score同disable所有gameplay script
+// This script handles player collision with obstacles, triggering the game over panel, freezing the score, and disabling gameplay scripts.
+
 using UnityEngine;
 
 public class PlayerHit : MonoBehaviour

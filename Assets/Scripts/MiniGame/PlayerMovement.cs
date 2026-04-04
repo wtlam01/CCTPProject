@@ -1,3 +1,6 @@
+// 控制玩家上下移動，用上下鍵控制，冇重力，input喺Update讀，physics喺FixedUpdate apply
+// This script handles player movement using up and down arrow keys with no gravity, reading input in Update and applying physics in FixedUpdate for stability.
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 // new input system for keyboard detection

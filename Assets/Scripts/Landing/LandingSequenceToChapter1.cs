@@ -1,3 +1,8 @@
+// Control Landing scene嘅完整開場流程，依次播放intro video、wakeup loop video
+// 等玩家click bubble之後繼續播choices video，最後顯示Chapter 1 title再跳去下一個scene
+// This script controls the full landing sequence, playing videos in order with a looping wakeup section
+// that waits for the player to click a bubble hotspot before continuing to the choices video and chapter title.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;

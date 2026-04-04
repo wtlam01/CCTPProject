@@ -1,3 +1,8 @@
+// Control Chapter 1嘅開場video sequence，先播第一條片，然後wakeup video會loop
+// 等玩家click bubble先繼續，之後播choices video，最後顯示Chapter 1嘅title overlay
+// This script controls the Chapter 1 opening sequence, playing an intro video then looping the wakeup video
+// until the player clicks the bubble hotspot, before continuing to the choices video and showing the chapter title.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

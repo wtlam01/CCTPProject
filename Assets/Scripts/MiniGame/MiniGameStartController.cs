@@ -1,3 +1,6 @@
+// control mini game嘅開始畫面，等玩家按上或下鍵先開始，之前所有gameplay script都係disable狀態
+// This script gates the mini game start behind a key press, keeping all gameplay scripts disabled until the player presses up or down arrow.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;

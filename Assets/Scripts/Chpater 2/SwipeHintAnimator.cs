@@ -1,3 +1,6 @@
+//控制swipe提示嘅手指動畫，手指向上移動同時慢慢淡出，loop直到被隱藏。
+// This script animates a looping finger hint that moves upward and fades out, used to show the player to swipe up.
+
 using System.Collections;
 using UnityEngine;
 // basic imports, no UI needed here since controlling RectTransform and CanvasGroup directly

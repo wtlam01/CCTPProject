@@ -1,3 +1,6 @@
+//控制鍵盤上下鍵提示嘅動畫，交替模擬按下up同down鍵，loop直到玩家真正按鍵先fade out隱藏
+// This script animates a keyboard hint showing up and down key presses in a loop, fading out and hiding when the player actually presses a key.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

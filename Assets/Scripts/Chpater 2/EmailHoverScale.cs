@@ -1,3 +1,6 @@
+// 控制email按鈕hover時嘅縮放效果，滑鼠移上去會smoothly放大，移走就縮返
+// This script handles a smooth scale effect on the email button, lerping up on hover and back on exit.
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 // importing event system so we can detect mouse hover

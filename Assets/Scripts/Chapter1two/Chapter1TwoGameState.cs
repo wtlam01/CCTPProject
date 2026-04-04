@@ -1,3 +1,9 @@
+// Chapter 1 Two嘅全局遊戲狀態，用DontDestroyOnLoad保持喺scene切換之間
+// 追蹤玩家嘅日數、讀書次數、遊戲次數同retry次數，用嚟判斷最後考試係pass定fail
+// This script holds the persistent game state for Chapter 1 Two, surviving scene loads to carry data
+// between the hub and mini game. It tracks days, study count, play count and retry penalties
+// which together determine whether the player passes or fails the final exam.
+
 using UnityEngine;
 
 public class Chapter1TwoGameState : MonoBehaviour

@@ -1,3 +1,10 @@
+// Chapter 1 Two嘅hub控制器，玩家可以選擇一齊讀書或者去打遊戲
+// 讀書用space mash控制video速度，打遊戲會先播video再跳去mini game scene
+// 總共7日，每個選擇用1日，去到7日就觸發ecam，判斷pass定fail
+// This script controls the Chapter 1 Two hub where the player chooses to study together or play a mini game.
+// Studying uses a space bar mash mechanic to control video speed, while playing loads a mini game scene.
+// After 7 total days the exam triggers, passing requires the right combination of study and play choices.
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

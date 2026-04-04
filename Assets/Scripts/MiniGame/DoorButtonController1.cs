@@ -1,3 +1,8 @@
+//控制mini game入面嘅出口門按鈕，hover會換sprite，click會通知hub玩家返嚟
+// 然後跳去指定scene，有lock state可以控制門係咪可以click
+// This script handles the exit door button in the mini game, swapping sprites on hover and notifying
+// the hub that the player is returning before loading the target scene, with a lock state to control visibility.
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;

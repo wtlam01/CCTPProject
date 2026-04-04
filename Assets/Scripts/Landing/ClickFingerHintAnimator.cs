@@ -1,3 +1,8 @@
+// Control click提示嘅手指動畫，手指由右向左滑動，有fade in/out同埋tap pulse效果
+// loop直到被disable，用嚟提示玩家click bubble hotspot
+// This script animates a finger hint that slides right to left with fade and a subtle tap pulse,
+// looping until disabled externally to show the player where to click.
+
 using System.Collections;
 using UnityEngine;
 

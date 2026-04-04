@@ -1,3 +1,10 @@
+// 控制Chapter 2入面嘅video sequence，包括開場intro overlay、sofa顯示
+// 四條video依次播放，第一條video有swipe停頓機制，第二條片尾會fade to black切換去第三條
+// 最後第三條播完就顯示email UI
+// This script controls the Chapter 2 video sequence, fading through an intro overlay and sofa image
+// before playing four videos in order. The first swipeable video pauses at set timestamps waiting for
+// player input, the second fades to black near the end, and after the third the email UI appears.
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

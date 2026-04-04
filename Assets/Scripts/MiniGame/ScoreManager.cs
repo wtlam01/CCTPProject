@@ -1,3 +1,6 @@
+// 追蹤同顯示玩家嘅分數，隨時間增加，玩家死亡後停止計分
+// This script tracks and displays the player score over time using an accumulator for clean whole number increments, stopping when the player dies.
+
 using UnityEngine;
 using TMPro;
 // TMPro for the score text display

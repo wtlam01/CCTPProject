@@ -1,3 +1,8 @@
+// control overwork事件入面嘅橙色overlay wipe效果，玩家需要用滑鼠或者手指
+// 喺橙色overlay上面抹，抹到指定百分比之後overlay自動消失，觸發下一步
+// This script handles the orange wipe overlay in the overwork sequence, where the player drags across
+// the screen to clear it. Once enough is wiped away, the overlay hides itself and fires an event to continue.
+
 using System;
 using UnityEngine;
 using UnityEngine.UI;

@@ -1,3 +1,7 @@
+// 控制退exit按鈕，hover會換sprite，click會隱藏sofa UI同觸發sofa controller嘅exit流程
+// This script handles the exit door button, swapping sprites on hover and triggering the exit sequence
+// through the sofa controller when clicked, including hiding relevant UI elements beforehand.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

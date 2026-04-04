@@ -1,3 +1,6 @@
+// 簡化版嘅門hover效果，只係負責hover時換sprite，冇任何click邏輯
+// This script is a lightweight hover-only door controller, handling sprite swaps on mouse enter and exit with no click behaviour.
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;

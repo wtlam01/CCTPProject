@@ -1,3 +1,6 @@
+// 控制TMP文字嘅hover縮放效果，滑鼠移上去會smoothly放大15%，移走就縮返
+// This script handles a smooth hover scale effect on TMP text elements, lerping up on mouse enter and back on exit.
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 // event system for hover detection

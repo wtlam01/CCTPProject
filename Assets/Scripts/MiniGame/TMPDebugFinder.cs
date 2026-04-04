@@ -1,3 +1,8 @@
+// debug嘅script，掃描scene入面所有TMP text object，檢查有冇missing font、NaN position或者異常font size
+// 只係debug用
+// This is a debug-only script that scans all TMP text objects in the scene and logs errors for missing fonts,
+// invalid rect values, or abnormal font sizes.
+
 using UnityEngine;
 using TMPro;
 // TMPro to find and inspect all TextMeshProUGUI components in scene

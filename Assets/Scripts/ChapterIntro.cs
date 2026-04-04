@@ -1,26 +1,35 @@
+// this script係控制章節開場動畫，先顯示文字同黑背景
+// 停留一段時間後淡出，然後淡入圖片。
+// This script handles the chapter intro sequence, fades out the title overlay then fades in the image.
+
 using UnityEngine;
 using System.Collections;
 
+
 public class ChapterIntro : MonoBehaviour
 {
-    public CanvasGroup introGroup;   // 黑背景 + 文字
-    public CanvasGroup imageGroup;   // Sofa 圖片
+    public CanvasGroup introGroup;
+    // black background and text canvas group
+
+    public CanvasGroup imageGroup;
+    // image canvas group
 
     public float fadeDuration = 1.5f;
     public float holdTime = 1.5f;
+    // how long the text stays before starting to fade out
 
     void Start()
     {
         imageGroup.alpha = 0f;
         StartCoroutine(FadeSequence());
+        // image starts hidden, then begin the sequence
     }
 
     IEnumerator FadeSequence()
     {
-        // 等待文字停留
         yield return new WaitForSeconds(holdTime);
+        // wait for text hold time
 
-        // 淡出文字 + 黑背景
         float t = 0f;
         while (t < fadeDuration)
         {
@@ -28,13 +37,12 @@ public class ChapterIntro : MonoBehaviour
             introGroup.alpha = 1f - (t / fadeDuration);
             yield return null;
         }
-
         introGroup.alpha = 0f;
+        // fade out text and black background
 
-        // 等 0.3 秒（可選）
         yield return new WaitForSeconds(0.3f);
+        // short pause before fading in image
 
-        // 淡入圖片
         t = 0f;
         while (t < fadeDuration)
         {
@@ -42,7 +50,7 @@ public class ChapterIntro : MonoBehaviour
             imageGroup.alpha = t / fadeDuration;
             yield return null;
         }
-
         imageGroup.alpha = 1f;
+        // fade in image
     }
 }

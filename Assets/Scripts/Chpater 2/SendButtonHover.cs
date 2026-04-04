@@ -1,3 +1,6 @@
+// 控制send按鈕hover時嘅縮放效果，同email按鈕一樣原理，smoothly放大再縮返
+// This script handles a smooth hover scale effect on the send button, lerping up on mouse enter and back on exit.
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 // event system needed for the hover detection

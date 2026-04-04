@@ -1,3 +1,6 @@
+// 控制門按鈕，hover會換sprite，click會隱藏email overlay同觸發sofa controller開始
+// This script handles the door button, swapping sprites on hover and triggering the sofa sequence on click.
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;

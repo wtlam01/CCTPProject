@@ -1,3 +1,10 @@
+//sofa scene嘅主要控制器，負責sofa video loop、email互動、drag gate機制
+// exit流程同埋最後嘅end screen。玩家check email夠3次之後先出現exit door
+// 按door之後播do nothing video，fade out之後顯示end screen再返去homepage
+// This script is the main controller for the sofa scene, managing the looping sofa video, email button
+// interactions with a drag-to-continue mechanic, exit door visibility based on check count,
+// and the final do-nothing video sequence that leads to the end screen before returning home.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

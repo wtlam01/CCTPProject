@@ -1,3 +1,6 @@
+// control 每個障礙物向左移動，速度由DifficultyManager控制，出咗畫面就自動刪除
+// This script moves each obstacle leftward at a speed multiplied by the difficulty manager, destroying itself once off screen.
+
 using UnityEngine;
 
 public class ObstacleController : MonoBehaviour

@@ -1,3 +1,8 @@
+// Chapter 1專用嘅swipe提示動畫，手指向上移動同時慢慢淡出，loop直到隱藏。
+// 同原版SwipeHintAnimator唔同嘅係，呢個可以由外部設定起始位置，用於rest video嘅唔同停頓點。
+// This script animates a swipe hint finger that moves upward and fades out in a loop,
+// with the ability to reposition itself externally for different swipe stop positions in the rest video.
+
 using System.Collections;
 using UnityEngine;
 

@@ -1,3 +1,10 @@
+// Chapter 1嘅主要hub控制器，負責處理玩家嘅三個選擇（study, rest, chat）
+// 播放對應嘅video，追蹤選擇次數，並且喺7次選擇之後觸發考試同判斷pass定fail (Exam video)
+// 讀書3次連續會觸發overwork事件，玩家需要完成wipe動畫先可以繼續。
+// This script is the main hub controller for Chapter 1, handling three player choices (study, rest, chat),
+// playing the corresponding videos, tracking choice counts, and triggering the exam after 7 total choices.
+// Studying 3 times in a row triggers an overwork event with a wipe-to-clear overlay mechanic.
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

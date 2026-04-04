@@ -1,3 +1,8 @@
+// email overlay嘅完整流程，包括文字輸入、x mask顯示、send之後panel向上滑走
+// 同埋之後顯示門按鈕。玩家打嘅字會即時被x遮住，send之後panel fade出，門就出現
+// This script controls the email overlay, handling text input with x masking, a slide-up send animation,
+// and showing the door button after the panel leaves the screen.
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

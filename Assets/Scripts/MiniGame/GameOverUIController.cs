@@ -1,3 +1,6 @@
+//控制game over畫面入面嘅出口門按鈕顯示邏輯，每第3次die就cant exit，迫玩家多retry幾次
+// This script controls whether the exit door appears on the game over screen, hiding it every 3rd death to encourage more retries.
+
 using UnityEngine;
 
 public class GameOverUIController : MonoBehaviour

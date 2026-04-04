@@ -1,3 +1,6 @@
+//按鈕hover嘅縮放同埋亮度效果，滑鼠移上去會smoothly放大同變光，移走就返回原本
+// This script handles a hover effect that smoothly scales up and brightens the button on mouse enter, then lerps back to normal on exit.
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;

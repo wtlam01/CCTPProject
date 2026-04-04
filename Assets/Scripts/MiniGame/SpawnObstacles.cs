@@ -1,3 +1,6 @@
+// 負責生成障礙物，隨機揀Y位置並check有冇overlap，生成間距會隨時間慢慢縮短令難度增加
+// This script spawns obstacles at random vertical positions with overlap checking, gradually reducing spawn intervals over time to increase difficulty.
+
 using UnityEngine;
 
 public class SpawnObstacles : MonoBehaviour
