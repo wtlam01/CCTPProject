@@ -856,3 +856,34 @@ public class Chapter1DailyHubController : MonoBehaviour
         // reusable fade coroutine used for blackout
     }
 }
+
+
+// Game manager pattern:
+// Code Monkey (2021) Code Monkey [YouTube channel]
+// https://www.youtube.com/@CodeMonkeyUnity
+//
+// Video playback implementation:
+// Brackeys (2020) Brackeys [YouTube channel]
+// https://www.youtube.com/@Brackeys
+// Unity Technologies (2023) VideoPlayer API
+// https://docs.unity3d.com/ScriptReference/Video.VideoPlayer.html
+//
+// Scene transition:
+// Unity Technologies (2023) SceneManager.LoadScene
+// https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html
+//
+// Coroutine pattern:
+// Unity Technologies (2023) Coroutines
+// https://docs.unity3d.com/Manual/Coroutines.html
+//
+// CanvasGroup fade technique:
+// Unity Technologies (2023) CanvasGroup
+// https://docs.unity3d.com/ScriptReference/CanvasGroup.html
+//
+// Singleton pattern for game state:
+// Nystrom, R. (2014) Game Programming Patterns
+// https://gameprogrammingpatterns.com/singleton.html
+//
+// New Input System:
+// Unity Technologies (2023) Input System
+// https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/manual/index.html

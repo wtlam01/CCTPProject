@@ -32,3 +32,5 @@ public class ObstacleSpriteSetup : MonoBehaviour
         // toggle trick bc PolygonCollider2D doesnt auto update when sprite changes
     }
 }
+
+//Reference: Mini game (Dani, 2020)

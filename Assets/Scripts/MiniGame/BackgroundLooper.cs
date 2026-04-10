@@ -27,3 +27,5 @@ public class BackgroundLooper : MonoBehaviour
         // once it goes too far left, snap it back to the right so it loops seamlessly
     }
 }
+
+//Reference: Mini game (Dani, 2020)

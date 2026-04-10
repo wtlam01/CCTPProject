@@ -461,3 +461,6 @@ public class SegmentedVideoSwipe_NewInput : MonoBehaviour
         // reusable fade function used everywhere in this script, lerps alpha over time
     }
 }
+
+// References: Unity VideoPlayer API https://docs.unity3d.com/ScriptReference/Video.VideoPlayer.html
+// Unity New Input System - https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/manual/index.html

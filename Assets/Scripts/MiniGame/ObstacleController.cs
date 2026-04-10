@@ -32,3 +32,5 @@ public class ObstacleController : MonoBehaviour
         // 出咗畫面就destroy，keep scene clean
     }
 }
+
+//Reference: Mini game (Dani, 2020)

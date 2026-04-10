@@ -52,3 +52,5 @@ public class ScoreManager : MonoBehaviour
         // update the text display whenever score changes
     }
 }
+
+//Reference: Mini game (Dani, 2020)

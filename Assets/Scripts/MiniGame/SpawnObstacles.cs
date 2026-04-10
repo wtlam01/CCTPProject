@@ -90,3 +90,5 @@ public class SpawnObstacles : MonoBehaviour
         // shows spawn point in scene view when selected, useful for positioning
     }
 }
+
+//Reference: Mini game (Dani, 2020)

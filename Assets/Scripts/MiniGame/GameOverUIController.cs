@@ -41,3 +41,5 @@ public class GameOverUIController : MonoBehaviour
         // only update if state actually changed, avoid unnecessary SetActive calls every frame
     }
 }
+
+// Reference: Code Monkey (2021)

@@ -309,3 +309,6 @@ public class WipeToClearOverlay : MonoBehaviour
         return changed;
     }
 }
+
+// References: Texture2D painting technique
+// https://docs.unity3d.com/ScriptReference/Texture2D.SetPixels32.html

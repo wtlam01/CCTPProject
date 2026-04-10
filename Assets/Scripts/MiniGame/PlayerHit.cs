@@ -72,3 +72,5 @@ public class PlayerHit : MonoBehaviour
         // solid collider hit, both covered just in case
     }
 }
+
+//Reference: Mini game (Dani, 2020)

@@ -30,3 +30,6 @@ public class DifficultyManager : MonoBehaviour
         // increment speed each frame but clamp it so it never goes above maxSpeed
     }
 }
+
+// References: Singleton pattern - common Unity design pattern 
+//Reference: Mini game (Dani, 2020)

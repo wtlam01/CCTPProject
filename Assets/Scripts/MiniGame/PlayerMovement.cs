@@ -42,3 +42,6 @@ public class PlayerMovement : MonoBehaviour
         // apply movement in FixedUpdate bc its physics based, more stable than Update
     }
 }
+
+
+//Reference: Mini game (Dani, 2020)
