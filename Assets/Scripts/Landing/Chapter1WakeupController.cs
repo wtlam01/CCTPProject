@@ -1,7 +1,22 @@
-// Control Chapter 1嘅開場video sequence，先播第一條片，然後wakeup video會loop
-// 等玩家click bubble先繼續，之後播choices video，最後顯示Chapter 1嘅title overlay
-// This script controls the Chapter 1 opening sequence, playing an intro video then looping the wakeup video
-// until the player clicks the bubble hotspot, before continuing to the choices video and showing the chapter title.
+// script 控制 Chapter 1 嘅開場 video flow：
+// 一開始：
+// 1. play第一條 intro video（firstVideoURL）
+// 2. play之後切換到 wakeup video（wakeupVideoURL）
+// 3. wakeup video 會喺指定時間段內 loop（loopStart → loopEnd）
+// 4. 顯示 bubble hotspot 同 finger hint，等player click
+// 5. player click bubble 後，停止 loop，繼續播放 wakeup video 剩餘部分
+// 6. 然後播放 choices video（choicesVideoURL）
+// 7. 最後顯示 Chapter 1 title overlay（endOverlay）
+//
+// This script controls the Chapter 1 opening video sequence:
+// At the start
+// 1. Play the first intro video (firstVideoURL)
+// 2. Then switch to the wakeup video (wakeupVideoURL)
+// 3. Loop the wakeup video within a defined section (loopStart → loopEnd)
+// 4. Show the bubble hotspot and finger hint, waiting for player input
+// 5. When the player clicks the bubble, stop looping and continue the rest of the wakeup video
+// 6. Then play the choices video (choicesVideoURL)
+// 7. Finally, show the Chapter 1 title overlay (endOverlay)
 
 using System.Collections;
 using UnityEngine;
@@ -23,7 +38,7 @@ public class Chapter1WakeupController : MonoBehaviour
     public GameObject videoRawImageObject;  // VideoRawImage (RawImage GO)
 
     [Header("Video URLs")]
-    public string firstVideoURL  = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
+    public string firstVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/1.mp4";
     public string wakeupVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/11wakeup.mp4";
     public string choicesVideoURL = "https://w33lam.panel.uwe.ac.uk/CCTPVideo/112Choices.mp4";
 
@@ -96,8 +111,11 @@ public class Chapter1WakeupController : MonoBehaviour
         videoPlayer.time = loopStart;
         videoPlayer.Play();
 
+        // keep looping the wakeup segment until player clicks
+        // this creates a "waiting state" where the system pauses progress until interaction
         while (inLoop && !clicked)
         {
+            // if video reaches loop end, reset back to loop start
             if (videoPlayer != null && videoPlayer.isPrepared && videoPlayer.time >= loopEnd)
             {
                 videoPlayer.time = loopStart;
@@ -194,6 +212,8 @@ public class Chapter1WakeupController : MonoBehaviour
         }
     }
 
+// 控制 UI 淡入淡出嘅 coroutine（用 CanvasGroup alpha）
+// This coroutine fades a CanvasGroup from one alpha value to another over time
     IEnumerator Fade(CanvasGroup cg, float from, float to, float duration)
     {
         if (cg == null) yield break;
@@ -208,9 +228,10 @@ public class Chapter1WakeupController : MonoBehaviour
         float t = 0f;
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime;
-            cg.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration));
-            yield return null;
+            t += Time.unscaledDeltaTime; // increase time using unscaled time (works even if game is paused)
+            cg.alpha = Mathf.Lerp(from, to, Mathf.Clamp01(t / duration)); 
+            // interpolate alpha smoothly from "from" to "to"
+            yield return null;  // wait until next frame
         }
         cg.alpha = to;
     }

@@ -1,9 +1,26 @@
-// script控制homepage嘅video播放流程，第一次開game會顯示「Click to Begin」overlay，
-// 玩家click之後先播icon video，播完之後切換去homepage loop video同顯示UI按鈕
-// 如果係同一個session入面返嚟homepage（例如玩完game返嚟），就直接播，唔需要再click
-// This script controls the homepage video sequence. On first load it shows a click to begin overlay,
-// then plays the icon video once before switching to the looping homepage video and showing the UI.
-// If the player returns to homepage within the same session, the overlay is skipped automatically.
+// script 控制 homepage 嘅 video play flow：
+// 一開始（第一次進入 session）：
+// 1. 顯示「Click to Begin」overlay
+// 2. player click 後開始播放 icon video（播放一次）
+// 3. icon 播完後淡入黑幕&切換
+// 4. 播放 homepage video（loop）
+// 5. 顯示首頁 UI（buttons 等）
+
+// 如果同一個 session 再次返回 homepage：
+// 1. 跳過「Click to Begin」overlay
+// 2. 直接播放 icon → homepage video flow
+//
+// This script controls the homepage video sequence:
+// On the first visit in a session:
+// 1. Show the "Click to Begin" overlay
+// 2. Wait for player input, then play the icon video (once)
+// 3. Fade to black and switch after the icon finishes
+// 4. Play the homepage video (loop)
+// 5. Show homepage UI (buttons, etc.)
+
+// If returning to the homepage within the same session:
+// 1. Skip the "Click to Begin" overlay
+// 2. Start the icon → homepage video sequence directly
 
 using System.Collections;
 using UnityEngine;

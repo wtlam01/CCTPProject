@@ -1,8 +1,19 @@
-// this script係控制章節開場動畫，先顯示文字同黑背景
-// 停留一段時間後淡出，然後淡入圖片。
+// script 控制一個chapter開場動畫flow：
+// 一開始顯示：
+// 1. 黑背景 + 文字（introGroup）
+// 2. 停留一段時間（holdTime）
+// 3. 將文字 + 黑背景 淡出
+// 4. 停一小段（0.3 秒）
+// 5. 圖片（imageGroup）淡入
 // This script handles the chapter intro sequence, fades out the title overlay then fades in the image.
+// At the start:
+// 1. Show black background + text (introGroup)
+// 2. Hold for a short duration (holdTime)
+// 3. Fade out the text + black background
+// 4. Wait briefly (0.3 seconds)
+// 5. Fade in the image (imageGroup)
 
-using UnityEngine;
+using UnityEngine; //用 Unity 的功能 (import 工具箱 kind of) ,  Import Unity core functionalities
 using System.Collections;
 
 
@@ -18,7 +29,7 @@ public class ChapterIntro : MonoBehaviour
     public float holdTime = 1.5f;
     // how long the text stays before starting to fade out
 
-    void Start()
+    void Start() //遊戲開始時，會自動做一次
     {
         imageGroup.alpha = 0f;
         StartCoroutine(FadeSequence());
@@ -34,7 +45,7 @@ public class ChapterIntro : MonoBehaviour
         while (t < fadeDuration)
         {
             t += Time.deltaTime;
-            introGroup.alpha = 1f - (t / fadeDuration);
+            introGroup.alpha = 1f - (t / fadeDuration); // gradually reduce alpha from 1 to 0 over time (fade out)
             yield return null;
         }
         introGroup.alpha = 0f;
@@ -47,7 +58,7 @@ public class ChapterIntro : MonoBehaviour
         while (t < fadeDuration)
         {
             t += Time.deltaTime;
-            imageGroup.alpha = t / fadeDuration;
+            imageGroup.alpha = t / fadeDuration; // gradually increase alpha from 0 to 1 (fade in)
             yield return null;
         }
         imageGroup.alpha = 1f;

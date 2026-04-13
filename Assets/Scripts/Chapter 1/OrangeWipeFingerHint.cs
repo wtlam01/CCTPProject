@@ -1,7 +1,27 @@
-// 控制overwork wipe效果入面嘅手指提示動畫，手指會沿住M形路徑移動
-// 提示玩家用手指喺橙色overlay上面抹嚟抹去，loop直到玩家開始wipe先停
-// This script animates a finger hint that traces an M-shaped path across the screen,
-// used during the overwork orange wipe overlay to show the player how to wipe the screen.
+// script 控制 overwork wipe 效果入面嘅finger提示動畫：
+// 一開始：
+// 1. 手指先 fade in
+// 2. 手指會沿住預設嘅 M 字路徑移動（p0 → p4）
+// 3. 移動途中會配合縮放變化，模擬按壓／抹動作
+// 4. 到達終點後停一小段時間
+// 5. 然後 fade out
+// 6. 停一小段時間後再重複 loop
+
+// 呢個提示會喺 overwork 嘅橙色 wipe overlay 入面出現
+// 用嚟引導玩家做出來回擦拭畫面嘅動作，直到系統將佢停用為止
+
+// This script controls the finger hint animation used in the overwork wipe sequence:
+// At the start:
+// 1. The finger fades in
+// 2. It moves along a predefined M-shaped path (p0 → p4)
+// 3. Its scale changes during movement to simulate pressing / wiping
+// 4. It briefly holds at the end
+// 5. Then fades out
+// 6. After a short delay, the loop repeats
+
+// This hint appears during the orange overwork wipe overlay,
+// guiding the player to wipe back and forth across the screen
+// until the system stops the animation externally.
 
 using System.Collections;
 using UnityEngine;
@@ -191,3 +211,7 @@ public class OrangeWipeFingerHint : MonoBehaviour
         // standard fade coroutine
     }
 }
+
+//Unity Technologies (2023) Mathf.SmoothStep. https://docs.unity3d.com/ScriptReference/Mathf.SmoothStep.html
+// movement smoother than linear interpolation
+// more natural motion

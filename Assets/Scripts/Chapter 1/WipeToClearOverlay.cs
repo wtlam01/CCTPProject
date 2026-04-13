@@ -1,7 +1,29 @@
-// control overwork事件入面嘅橙色overlay wipe效果，玩家需要用滑鼠或者手指
-// 喺橙色overlay上面抹，抹到指定百分比之後overlay自動消失，觸發下一步
-// This script handles the orange wipe overlay in the overwork sequence, where the player drags across
-// the screen to clear it. Once enough is wiped away, the overlay hides itself and fires an event to continue.
+// scriptto 控制 overwork 事件入面嘅橙色 wipe overlay 互動
+// 一開始：
+// 1. 顯示橙色 overlay，並套用可被清除嘅 mask texture
+// 2. 顯示手指提示動畫，引導玩家喺畫面上來回抹動
+// 3. 玩家可以用滑鼠或手指喺 overlay 上塗抹
+// 4. 被抹過嘅位置會變成透明，逐步清除畫面
+// 5. 當玩家第一次開始抹時，手指提示會自動消失
+// 6. 系統會持續計算已清除嘅比例
+// 7. 當清除比例達到指定門檻（clearToFinish）後：
+//    overlay 自動隱藏
+//    停止 wipe 互動
+//    觸發 OnFinished event，通知下一步流程繼續
+
+// This script controls the orange wipe overlay interaction used in the overwork sequence:
+// At the start:
+// 1. Show the orange overlay and apply a wipeable mask texture
+// 2. Display a finger hint animation to guide the wiping motion
+// 3. Allow the player to drag across the overlay using mouse or touch
+// 4. The wiped areas gradually become transparent
+// 5. Once the player starts dragging, the hint is hidden automatically
+// 6. The system continuously checks the cleared ratio
+// 7. When the cleared amount reaches the required threshold (clearToFinish):
+//    - the overlay hides itself
+//    - wiping is disabled
+//    - the OnFinished event is triggered to continue the sequence
+
 
 using System;
 using UnityEngine;

@@ -1,7 +1,22 @@
-// 控制click提示嘅手指動畫，手指停喺原位fade in/out同埋tap pulse效果
-// tap到底嗰一刻會有白色半透明圓形放大然後消失嘅ripple effect，loop直到被disable
-// This script animates a stationary finger hint with fade, tap pulse, and a white ripple circle
-// that expands and fades out at the moment the finger reaches the bottom of its tap, looping until disabled externally.
+// this 控制 click 提示finger animation：
+// 一開始（enable 後）：
+// 1. 手指由透明 fade in
+// 2. 停一小段時間（pulseDelay）
+// 3. 手指縮細（模擬按下）
+// 4. 同時觸發白色 ripple 圓形（放大 + 消失）
+// 5. 手指回復原本大小（彈返上）
+// 6. 手指 fade out
+// 7. 停一小段時間（loopGap）再重複
+
+// This script animates a looping click hint:
+// At each loop:
+// 1. Fade in the finger
+// 2. Wait briefly before interaction
+// 3. Scale down to simulate a tap
+// 4. Trigger a ripple effect at the bottom of the tap
+// 5. Scale back up
+// 6. Fade out the finger
+// 7. Wait briefly, then repeat
 
 using System.Collections;
 using UnityEngine;

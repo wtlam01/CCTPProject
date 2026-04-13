@@ -1,9 +1,56 @@
-// Chapter 1嘅主要hub控制器，負責處理玩家嘅三個選擇（study, rest, chat）
-// 播放對應嘅video，追蹤選擇次數，並且喺7次選擇之後觸發考試同判斷pass定fail (Exam video)
-// 讀書3次連續會觸發overwork事件，玩家需要完成wipe動畫先可以繼續。
-// This script is the main hub controller for Chapter 1, handling three player choices (study, rest, chat),
-// playing the corresponding videos, tracking choice counts, and triggering the exam after 7 total choices.
-// Studying 3 times in a row triggers an overwork event with a wipe-to-clear overlay mechanic.
+// script 控制 Chapter 1 嘅核心互動系統（daily decision hub）：
+// player可以喺三個選擇之間切換（Study / Rest / Chat），每個選擇會觸發對應嘅影片同互動機制
+// 系統會隱藏地記錄player嘅行為（study 次數、連續次數、總選擇次數），並根據player嘅決策進行回饋
+
+// 主要flow：
+// 1. 顯示三個選擇（Study / Rest / Chat）作為每日決策
+// 2. player選擇後：
+//    播放對應 video（Study / Rest / Chat）
+//    更新隱藏數值（day、studyCount、streak、totalChoices）
+// 3. Study 包含「按鍵加速」機制（Space 控制播放速度）
+// 4. Rest 包含「滑動解鎖」機制（特定時間點需要 swipe 才可繼續）
+// 5. Chat 會切換至另一個 scene（Chapter1two）
+
+// 系統機制：
+// 6. 當連續 Study 達到 3 次 → 觸發 Overwork：
+//    播放 fire video
+//    進入 wipe-to-clear 互動（玩家需清除畫面）
+//    完成後返回 hub，並有隱藏懲罰（時間增加）
+
+// 7. 當總選擇達到 7 次 → 觸發 Exam：
+//    播放 exam video
+//    根據 Study / Rest 組合判斷結果（pass / fail）
+//    播放對應結果影片
+//    切換至 Chapter 2 scene
+
+// This script controls the core interactive system of Chapter 1 (daily decision hub):
+// The player can switch between three choices (Study / Rest / Chat), each triggering
+// a corresponding video and interaction mechanic.
+// The system secretly tracks player behaviour (study count, streak, total choices)
+// and responds based on accumulated decisions.
+
+// Main flow:
+// 1. Display three choices (Study / Rest / Chat) as daily decisions
+// 2. After the player selects an option:
+//    Play the corresponding video (Study / Rest / Chat)
+//    Update hidden values (day, studyCount, streak, totalChoices)
+// 3. Study includes a “press-to-speed” mechanic (Space controls playback speed)
+// 4. Rest includes a “swipe-to-continue” mechanic (player must swipe at specific timestamps)
+// 5. Chat transitions to another scene (Chapter1two)
+
+// System mechanics:
+// 6. If the player studies 3 times consecutively → trigger Overwork:
+//    Play fire video
+//    Enter wipe-to-clear interaction (player must clear the screen)
+//    Return to hub after completion with a hidden penalty (time increase)
+
+// 7. After 7 total choices → trigger Exam:
+//    Play exam video
+//    Determine result based on Study / Rest combination (pass / fail)
+//    Play corresponding result video
+//    Transition to Chapter 2 scene
+
+
 
 using System.Collections;
 using System.Collections.Generic;

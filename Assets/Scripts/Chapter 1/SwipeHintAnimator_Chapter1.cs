@@ -1,7 +1,30 @@
-// Chapter 1專用嘅swipe提示動畫，手指向上移動同時慢慢淡出，loop直到隱藏。
-// 同原版SwipeHintAnimator唔同嘅係，呢個可以由外部設定起始位置，用於rest video嘅唔同停頓點。
-// This script animates a swipe hint finger that moves upward and fades out in a loop,
-// with the ability to reposition itself externally for different swipe stop positions in the rest video.
+// script 控制 Chapter 1 嘅 swipe 手指提示動畫：
+// 一開始：
+// 1. 手指會出現在指定位置（可由外部設定）
+// 2. 手指向上移動（模擬 swipe 上）
+// 3. 移動途中逐漸淡出
+// 4. 到達頂部後完全消失
+// 5. 停一小段時間
+// 6. 再回到起始位置並重複 loop
+
+// this hints is to 用喺 Rest video 嘅停頓位置
+// 用嚟引導玩家做「向上滑」嘅操作
+// 同一般 swipe hint 唔同，呢個可以動態設定位置（SetBaseFrom）
+// 所以可以喺唔同時間點出現喺唔同位置
+
+// This script controls the swipe hint animation used in Chapter 1:
+// At the start:
+// 1. The finger appears at a specified position (set externally)
+// 2. It moves upward to simulate a swipe gesture
+// 3. It gradually fades out during the movement
+// 4. It becomes fully invisible at the top
+// 5. Waits briefly
+// 6. Then resets to the starting position and loops
+
+// This hint is used at pause points in the Rest video,
+// guiding the player to perform an upward swipe.
+// Unlike a basic swipe hint, this version allows dynamic repositioning (SetBaseFrom),
+// so it can be reused at multiple points in the sequence.
 
 using System.Collections;
 using UnityEngine;
