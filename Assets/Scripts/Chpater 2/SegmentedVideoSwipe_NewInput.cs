@@ -1,9 +1,53 @@
-// 控制Chapter 2入面嘅video sequence，包括開場intro overlay、sofa顯示
-// 四條video依次播放，第一條video有swipe停頓機制，第二條片尾會fade to black切換去第三條
-// 最後第三條播完就顯示email UI
-// This script controls the Chapter 2 video sequence, fading through an intro overlay and sofa image
-// before playing four videos in order. The first swipeable video pauses at set timestamps waiting for
-// player input, the second fades to black near the end, and after the third the email UI appears.
+// script 控制 Chapter 2 嘅完整 video sequence：
+
+// 一開始：
+// 1. 顯示 Chapter Two intro overlay
+// 2. intro 停留一段時間後淡出
+// 3. 顯示 sofa image 一小段時間作過渡
+// 4. 然後切換到 video 顯示區域
+
+// 影片流程：
+// 5. 先播放 pre-first video（notice video）
+// 6. 播完後切換到第一條 video（scrolling phone）
+// 7. 第一條 video 會喺指定時間點停頓（stopTimes）
+// 8. 每次停頓都要等玩家向上 swipe 先可以繼續播放
+// 9. swipe hint 只會喺第一次停頓時顯示
+
+// 後續影片：
+// 10. 第一條 video 全部停頓完成後，切換到第二條 video
+// 11. 第二條 video 接近結尾時會 gradually fade to black
+// 12. 然後切換到第三條 video
+
+// 最後：
+// 13. 第三條 video 播完後，畫面 fade to black
+// 14. 顯示 email UI 作為下一個互動階段
+
+
+// This script controls the full Chapter 2 video sequence:
+
+// At the start:
+// 1. Show the Chapter Two intro overlay
+// 2. Hold briefly, then fade it out
+// 3. Show the sofa image for a short transition moment
+// 4. Then switch to the video display area
+
+// Video flow:
+// 5. Play the pre-first video (notice video)
+// 6. Then switch to the first video (scrolling phone)
+// 7. The first video pauses at specific timestamps (stopTimes)
+// 8. At each stop, the player must swipe upward to continue
+// 9. The swipe hint is only shown at the first pause
+
+// ollowing videos:
+// 10. After all first-video stops are completed, switch to the second video
+// 11. Near the end of the second video, fade gradually to black
+// 12. Then transition to the third video
+
+// At the end:
+// 13. After the third video finishes, fade to black
+// 14. Show the email UI as the next interaction stage
+
+
 
 using System.Collections;
 using System.Collections.Generic;

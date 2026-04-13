@@ -1,5 +1,36 @@
-// 控制email按鈕hover時嘅縮放效果，滑鼠移上去會smoothly放大，移走就縮返
-// This script handles a smooth scale effect on the email button, lerping up on hover and back on exit.
+// script 控制 email 按鈕嘅 hover 縮放效果
+// 使用 Lerp 做平滑過渡，而唔係即時跳變
+
+// 一開始：
+// 1. 記錄按鈕原本嘅大小（originalScale）
+// 2. 將 targetScale 設為原本大小
+
+// 每一幀（Update）：
+// 3. 使用 Lerp 將目前大小 gradually 移向 targetScale
+//    令縮放變得平滑，而唔係突然改變
+
+// 當滑鼠移上去（hover）：
+// 4. 將 targetScale 設為放大後嘅大小（originalScale * hoverScale）
+
+// 當滑鼠移走：
+// 5. 將 targetScale 設回原本大小（originalScale）
+
+// This script controls the email button hover scaling effect:
+// using Lerp to create a smooth transition instead of an instant change
+
+// At start:
+// 1. Store the original scale of the button (originalScale)
+// 2. Set targetScale to the original scale
+
+// Every frame (Update):
+// 3. Smoothly interpolate current scale towards targetScale using Lerp
+//    creates a smooth scaling effect instead of a sudden jump
+
+// On hover (pointer enter):
+// 4. Set targetScale to a larger value (originalScale * hoverScale)
+
+// On hover exit:
+// 5. Reset targetScale back to the original scale
 
 using UnityEngine;
 using UnityEngine.EventSystems;

@@ -1,6 +1,47 @@
-// 控制退exit按鈕，hover會換sprite，click會隱藏sofa UI同觸發sofa controller嘅exit流程
-// This script handles the exit door button, swapping sprites on hover and triggering the exit sequence
-// through the sofa controller when clicked, including hiding relevant UI elements beforehand.
+// script 控制 exit door butoom嘅互動流程：
+
+// 一開始：
+// 1. 設定門為關閉狀態（doorClosedSprite）
+// 2. 自動取得 doorImage 同 doorCanvasGroup
+
+// 當滑鼠移上去（hover）：
+// 3. 如果門可見，將 sprite 切換為打開狀態（doorOpenSprite）
+
+// 當滑鼠移走：
+// 4. 將 sprite 切換回關閉狀態（doorClosedSprite）
+
+// 當玩家 click exit door：
+// 5. 檢查 busy 狀態，避免重複 click
+// 6. 如果門目前不可見，取消操作
+// 7. 將門顯示為打開狀態（doorOpenSprite）
+// 8. 等待一小段時間（openHoldSeconds），player見到開門效果
+// 9. 即時隱藏 sofa 上相關按鈕（HideSofaButtonsImmediate）
+// 10. 隱藏其他指定 UI（emailGroupToHide / hideOnClick）
+// 11. 呼叫 sofa controller 嘅 RequestExit()，開始 exit 流程
+// 12. 最後將門重設為關閉狀態，並解除 busy 鎖定
+
+
+// This script controls the exit door button interaction flow:
+
+// At start:
+// 1. Set the door to the closed state (doorClosedSprite)
+// 2. Auto-assign doorImage and doorCanvasGroup if not set in the Inspector
+
+// On hover (pointer enter):
+// 3. If the door is visible, switch the sprite to the open door state (doorOpenSprite)
+
+// On hover exit:
+// 4. Switch the sprite back to the closed state (doorClosedSprite)
+
+// On click:
+// 5. Check the busy flag to prevent double clicking
+// 6. Cancel if the door is currently invisible
+// 7. Show the open door sprite (doorOpenSprite)
+// 8. Wait briefly (openHoldSeconds) so the open-door state is visible
+// 9. Immediately hide sofa-related buttons (HideSofaButtonsImmediate)
+// 10. Hide any additional UI objects (emailGroupToHide / hideOnClick)
+// 11. Call sofaEmailController.RequestExit() to begin the exit sequence
+// 12. Reset the door back to the closed sprite and release the busy lock
 
 using System.Collections;
 using UnityEngine;

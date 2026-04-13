@@ -1,5 +1,36 @@
-// 控制門按鈕，hover會換sprite，click會隱藏email overlay同觸發sofa controller開始
-// This script handles the door button, swapping sprites on hover and triggering the sofa sequence on click.
+// script 控制門按鈕（door button）嘅互動：
+// 包括 hover 換圖、click 觸發下一步流程同隱藏當前 UI
+
+// 一開始：
+// 1. 將門設為關閉狀態（doorClosedSprite）
+
+// 當滑鼠移上去（hover）：
+// 2. 將門圖片切換為打開狀態（doorOpenSprite）
+
+// 當滑鼠移開：
+// 3. 將門圖片切換回關閉狀態（doorClosedSprite）
+
+// 當玩家 click 門：
+// 4. 隱藏 email overlay（emailGroupToHide）
+// 5. 觸發下一個系統（sofaEmailController.StartSofaMode）
+// 6. 隱藏門本身（或者指定 UI object）
+
+// This script controls the door button interaction:
+// including hover sprite swapping, click transition, and UI hiding
+
+// At start:
+// 1. Set the door to closed state (doorClosedSprite)
+
+// On hover (pointer enter):
+// 2. Switch the sprite to the open door (doorOpenSprite)
+
+// On hover exit:
+// 3. Switch back to the closed door (doorClosedSprite)
+
+// On click:
+// 4. Hide the email overlay (emailGroupToHide)
+// 5. Trigger the next system (sofaEmailController.StartSofaMode)
+// 6. Hide the door itself (or a specified object)
 
 using UnityEngine;
 using UnityEngine.EventSystems;

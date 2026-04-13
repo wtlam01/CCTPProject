@@ -1,7 +1,62 @@
-// email overlay嘅完整流程，包括文字輸入、x mask顯示、send之後panel向上滑走
-// 同埋之後顯示門按鈕。玩家打嘅字會即時被x遮住，send之後panel fade出，門就出現
-// This script controls the email overlay, handling text input with x masking, a slide-up send animation,
-// and showing the door button after the panel leaves the screen.
+// script 控制 email overlay 互動流程：
+
+// 一開始（OnEnable）：
+// 1. 顯示 email overlay（可互動）
+// 2. 重置 panel 位置同透明度
+// 3. 清空 input field
+// 4. 自動 focus 輸入框（方便玩家即刻開始打字）
+// 5. 隱藏 door button 同 sofa
+
+// 當玩家輸入文字：
+// 6. 將真實輸入儲存喺 realInput
+// 7. 將顯示文字轉為 X mask（保留換行）
+// 8. 隱藏真實文字，只顯示 masked text
+
+// 當按下 Send：
+// 9. 停止 cursor（caret）動畫
+// 10. 開始 panel 向上滑動動畫（slide up）
+// 11. 同時可選擇 fade out panel
+
+// Panel 動畫期間：
+// 12. 禁用 panel interaction（避免誤觸）
+// 13. 使用 Lerp 將 panel 向上移動（Vector2.up）
+// 14. 同步將透明度由 1 → 0（如果有 fade）
+
+// 動畫完成後：
+// 15. 顯示 door button（進入下一步 interaction）
+
+// Door 之後：
+// 16. GoToSofa() 被呼叫 → 顯示 sofa，隱藏 email + video + door
+
+// This script controls the full email overlay interaction flow:
+
+// On enable:
+// 1. Show the email overlay (interactive)
+// 2. Reset panel position and visibility
+// 3. Clear the input field
+// 4. Auto-focus the input field for immediate typing
+// 5. Hide the door button and sofa
+
+// On text input:
+// 6. Store the real input in realInput
+// 7. Convert the displayed text into an X mask (preserving line breaks)
+// 8. Hide the real text and only show the masked version
+
+// On send click:
+// 9. Stop the caret animation
+// 10. Start the panel slide-up animation
+// 11. Optionally fade out the panel
+
+// During animation:
+// 12. Disable interaction on the panel
+// 13. Move the panel upward using Lerp
+// 14. Fade alpha from 1 → 0 (if enabled)
+
+// After animation:
+// 15. Show the door button (transition to next interaction)
+
+// After door interaction:
+// 16. GoToSofa() → shows sofa, hides email, video, and door
 
 using System.Collections;
 using UnityEngine;

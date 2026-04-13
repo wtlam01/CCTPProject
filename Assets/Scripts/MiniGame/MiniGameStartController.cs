@@ -1,5 +1,34 @@
-// control mini game嘅開始畫面，等玩家按上或下鍵先開始，之前所有gameplay script都係disable狀態
-// This script gates the mini game start behind a key press, keeping all gameplay scripts disabled until the player presses up or down arrow.
+// script 控制 mini game 開始流程：
+// 一開始：
+// 1. disable 所有 gameplay scripts
+// 2. 隱藏 gameplay 物件（showOnStart）
+// 3. 顯示 start panel 同鍵盤提示動畫
+
+// 等玩家按鍵：
+// 4. 偵測 up 或 down 鍵輸入
+// 5. 玩家按鍵後開始遊戲流程
+
+// 開始遊戲：
+// 6. 提示 UI fade out 並隱藏
+// 7. 隱藏 start panel
+// 8. 顯示 gameplay 物件
+// 9. enable 所有 gameplay scripts
+
+// This script controls the mini game start sequence.
+// At start:
+// 1. Disables all gameplay scripts
+// 2. Hides gameplay objects (showOnStart)
+// 3. Shows the start panel and keyboard hint animation
+
+// Waiting for input:
+// 4. Detects up or down arrow key press
+// 5. Once pressed, begins the game start routine
+
+// When the game starts:
+// 6. Fades out and hides the hint UI
+// 7. Hides the start panel
+// 8. Shows gameplay objects
+// 9. Enables all gameplay scripts
 
 using System.Collections;
 using UnityEngine;

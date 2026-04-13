@@ -1,5 +1,16 @@
-// 控制背景無限scroll效果，背景向左移動，去到指定位置就即刻teleport返右邊，make loop感覺
-// This script creates an infinite scrolling background by moving left and snapping back to the right when it goes too far
+// script 控制背景無限 scroll 效果：
+// 一開始：
+// 1. 背景持續向左移動（speed）
+// 2. 當移到指定位置（resetX）
+// 3. 即刻跳返右邊（moveToX）
+// 4. 重複以上流程形成無限 loop
+
+// This script creates an infinite scrolling background effect.
+// At runtime:
+// 1. The background continuously moves left (speed)
+// 2. When it reaches a set position (resetX)
+// 3. It instantly teleports back to the right (moveToX)
+// 4. The process repeats to create a seamless loop
 
 using UnityEngine;
 

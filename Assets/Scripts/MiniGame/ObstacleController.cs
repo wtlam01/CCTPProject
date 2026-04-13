@@ -1,5 +1,26 @@
-// control 每個障礙物向左移動，速度由DifficultyManager控制，出咗畫面就自動刪除
-// This script moves each obstacle leftward at a speed multiplied by the difficulty manager, destroying itself once off screen.
+// script 控制障礙物移動：
+// 一開始：
+// 1. 設定基礎速度（baseSpeed）
+
+// 遊戲進行中：
+// 2. 每一幀向左移動
+// 3. 速度會乘以 DifficultyManager 嘅 speed（隨時間加快）
+
+// 當離開畫面時：
+// 4. 當 x 座標 < destroyX
+// 5. 自動刪除 object（Destroy）
+
+// This script controls obstacle movement.
+// At start:
+// 1. Uses a base movement speed (baseSpeed)
+
+// During gameplay:
+// 2. Moves left every frame
+// 3. Speed is multiplied by DifficultyManager.speed (increases over time)
+
+// When off screen:
+// 4. If x position < destroyX
+// 5. Destroys the object automatically
 
 using UnityEngine;
 

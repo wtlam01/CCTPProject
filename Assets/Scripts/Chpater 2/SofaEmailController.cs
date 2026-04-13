@@ -1,9 +1,79 @@
-//sofa scene嘅主要控制器，負責sofa video loop、email互動、drag gate機制
-// exit流程同埋最後嘅end screen。玩家check email夠3次之後先出現exit door
-// 按door之後播do nothing video，fade out之後顯示end screen再返去homepage
-// This script is the main controller for the sofa scene, managing the looping sofa video, email button
-// interactions with a drag-to-continue mechanic, exit door visibility based on check count,
-// and the final do-nothing video sequence that leads to the end screen before returning home.
+// script 控制 sofa scene 嘅整體互動流程，include video loop、email interaction、exit flow 同 end screen
+
+// 主要 flow：
+// 1. 進入 Sofa 狀態：
+//    播放 sofa video（loop）
+//    延遲後顯示 email button（fade in）
+
+// 2. 玩家點擊 Email：
+//    播放 check email video
+//    喺指定時間 pause
+//    玩家需要向下 drag（drag gate）先可以繼續播放
+//    完成後返回 sofa 狀態
+//    系統記錄完成次數（emailCompleteCount）
+
+// 3. Exit Door 機制：
+//    玩家至少 check email 指定次數（minChecksToShowDoor）後
+//    exit door 先會出現
+// 4. 玩家點擊 Exit Door：
+//    進入 Exiting 狀態
+//    播放 do nothing video（可從中段開始）
+//    最後幾秒 fade out video
+
+// 5. Ending：
+//    顯示 end screen（文字）
+//    延遲後自動返回 homepage
+
+// 互動機制：
+// Email interaction 使用「drag 累積距離」作為 gate（dragAccumulation）
+// 只接受向下 drag（可設定）
+// 第一次 drag 前會顯示 finger hint 提示
+
+// UI 行為：
+// Email button 同 Exit door 使用 CanvasGroup 控制 fade / interaction
+// Email button hover 會有 scale effect（smooth lerp）
+// Exit door 可以同 email button 同步出現或分開控制
+
+
+
+
+// This script controls the overall interaction flow of the sofa scene,
+// including the looping sofa video, email interaction, exit sequence, and end screen.
+
+// Main flow:
+// 1. Enter Sofa state:
+//    Plays looping sofa video
+//    After a delay, fades in the email button
+
+// 2. Player clicks Email:
+//    Plays check email video
+//    Pauses at a specific timestamp
+//    Requires a downward drag (drag gate) to continue
+//    Returns to sofa state after completion
+//    Increments email completion count
+
+// 3. Exit Door logic:
+//    Exit door appears only after the player checks email a minimum number of times
+
+// 4. Player clicks Exit Door:
+//    Enters Exiting state
+//    Plays the “do nothing” video (optionally starting mid-way)
+//    Fades out near the end
+
+// 5. Ending:
+//    Displays the end screen text
+//   Automatically returns to the homepage after a delay
+
+// Interaction mechanics:
+// Email uses a drag accumulation system (dragAccumulation) as a gate
+// Can require downward drag only
+// A finger hint is shown on first interaction
+
+// UI behaviour:
+// Email button and exit door use CanvasGroup for fade and interaction control
+// Email button includes a smooth hover scale effect
+// Exit door can be synced with or independent from the email button
+
 
 using System.Collections;
 using UnityEngine;

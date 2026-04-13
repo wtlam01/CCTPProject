@@ -1,9 +1,52 @@
-// Chapter 1 Two嘅hub控制器，玩家可以選擇一齊讀書或者去打遊戲
-// 讀書用space mash控制video速度，打遊戲會先播video再跳去mini game scene
-// 總共7日，每個選擇用1日，去到7日就觸發ecam，判斷pass定fail
-// This script controls the Chapter 1 Two hub where the player chooses to study together or play a mini game.
-// Studying uses a space bar mash mechanic to control video speed, while playing loads a mini game scene.
-// After 7 total days the exam triggers, passing requires the right combination of study and play choices.
+// script 控制 Chapter 1 Two 嘅核心互動系統（social decision hub）：
+// player可以喺兩個選擇之間切換（Study Together / Play），每個選擇會觸發對應嘅影片同結果
+
+// 主要 flow：
+// 1. 顯示兩個選擇（Study Together / Play）作為每日決策
+// 2. player選擇後：
+//    播放對應 video（studyTogether / peerInfluence）
+//    更新隱藏數值（day、studyTogetherCount、playCount）
+// 3. Study Together 包含「按鍵加速」機制（Space 控制播放速度）
+// 4. Play 選擇會先播放 video，然後進入 mini game scene
+// 5. 從 mini game 返回後，系統會繼續進度並檢查狀態
+
+// 系統機制：
+// 6. 每個選擇消耗 1 日，最多 7 日
+// 7. 當總日數達到 7 → 觸發 Exam：
+//    播放 exam video
+//    根據 Study / Play 組合判斷結果（pass / fail）
+//    播放對應結果影片
+//    切換至 Chapter 2 scene
+
+// Additional behaviour：
+// Space hint 只會喺第一次 Study 出現，並喺玩家互動後消失
+// Video 播放會根據玩家輸入速度同步變化
+// 使用 GameState 系統去保存跨 scene 嘅進度
+
+// Tis script controls the Chapter 1 Two hub system (social decision hub):
+// The player chooses between Study Together and Play, each triggering different videos and outcomes.
+
+// Main flow:
+// 1. Show two choices (Study Together / Play) as daily decisions
+// 2. After player selects:
+//    Play corresponding video (studyTogether / peerInfluence)
+//    Update hidden system values (day, studyTogetherCount, playCount)
+// 3. Study Together uses a “space mash” mechanic (Space controls playback speed)
+// 4. Play option shows a video, then loads a mini game scene
+// 5. After returning from the mini game, the system resumes progression and checks state
+
+// System logic:
+// 6. Each choice consumes 1 day, with a maximum of 7 days
+// 7. When total days reach 7 → trigger Exam:
+//    Play exam video
+//    Evaluate player choices (study vs play combination)
+//    Play success or failure result video
+//    Transition to Chapter 2 scene
+
+// Additional behaviour:
+// - Space hint appears only on first study and disappears after interaction
+// - Video playback speed responds dynamically to player input
+// - Uses a shared GameState system to persist progress across scenes
 
 using System.Collections;
 using System.Collections.Generic;

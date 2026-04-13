@@ -1,5 +1,20 @@
-// 負責幫障礙物換sprite同埋強制rebuild PolygonCollider2D去match新sprite嘅形狀
-// This script applies a sprite to an obstacle and forces the polygon collider to rebuild by toggling it, since it doesnt auto update on sprite change.
+// script 控制障礙物 sprite 設定同 collider 更新：
+// 一開始：
+// 1. 取得 SpriteRenderer 同 PolygonCollider2D
+
+// 當設定新 sprite 時：
+// 2. 將新 sprite 套用到 SpriteRenderer
+// 3. 將 PolygonCollider2D disable 再 enable
+// 4. 強制重新生成 collider 形狀去 match 新 sprite
+
+// This script applies a sprite to an obstacle and updates its collider.
+// At start:
+// 1. Gets the SpriteRenderer and PolygonCollider2D components
+
+// When applying a new sprite:
+// 2. Sets the new sprite on the SpriteRenderer
+// 3. Disables and re-enables the PolygonCollider2D
+// 4. Forces the collider to rebuild to match the new sprite
 
 using UnityEngine;
 

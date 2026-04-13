@@ -1,5 +1,29 @@
-// 控制TMP文字嘅hover縮放效果，滑鼠移上去會smoothly放大15%，移走就縮返
-// This script handles a smooth hover scale effect on TMP text elements, lerping up on mouse enter and back on exit.
+// script 控制 TMP 文字嘅 hover 縮放效果：
+// 一開始：
+// 1. 記錄原本嘅 scale（originalScale）
+
+// 每一幀（Update）：
+// 2. 使用 Lerp 平滑過渡到 targetScale
+
+// 當滑鼠移上去時：
+// 3. 將 targetScale 設為放大後（originalScale * scaleMultiplier）
+
+// 當滑鼠移走時：
+// 4. 將 targetScale 設回原本大小
+
+// This script handles a smooth hover scale effect on TMP text.
+// At start:
+// 1. Store the original scale
+
+// Every frame (Update):
+// 2. Smoothly lerp towards the target scale
+
+// When the mouse enters:
+// 3. Set the target scale to a larger size (originalScale * scaleMultiplier)
+
+// When the mouse exits:
+// 4. Reset the target scale back to the original size
+
 
 using UnityEngine;
 using UnityEngine.EventSystems;

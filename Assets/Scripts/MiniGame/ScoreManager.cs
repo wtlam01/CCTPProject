@@ -1,5 +1,33 @@
-// 追蹤同顯示玩家嘅分數，隨時間增加，玩家死亡後停止計分
-// This script tracks and displays the player score over time using an accumulator for clean whole number increments, stopping when the player dies.
+// script 控制分數系統：
+// 一開始：
+// 1. 將分數設為 0
+// 2. 更新 UI 顯示
+
+// 每一幀（Update）：
+// 3. 累積時間（accumulator）
+// 4. 當累積達到 1 或以上：
+//    - 增加整數分數（Score）
+//    - 扣除已使用嘅累積值
+//    - 更新 UI 顯示
+
+// 當玩家死亡時：
+// 5. 停止計分（running = false）
+
+// This script tracks and displays the player score over time.
+// At start:
+// 1. Reset the score to 0
+// 2. Update the UI display
+
+// Every frame (Update):
+// 3. Accumulate time using an accumulator
+// 4. When the accumulated value reaches 1 or more:
+//    - Increase the score in whole numbers
+//    - Subtract the used accumulated value
+//    - Update the UI display
+
+// When the player dies:
+// 5. Stop the score system (running = false)
+
 
 using UnityEngine;
 using TMPro;

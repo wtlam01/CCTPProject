@@ -1,6 +1,24 @@
-// 處理玩家撞到障礙物嘅邏輯，觸發game over畫面、停止score同disable所有gameplay script
-// This script handles player collision with obstacles, triggering the game over panel, freezing the score, and disabling gameplay scripts.
+// script 控制玩家撞到障礙物後嘅 game over flow：
+// 一開始：
+// 1. 隱藏 game over panel 同 door button
 
+// 當玩家撞到障礙物時：
+// 2. 觸發 game over（只會觸發一次）
+// 3. 顯示 game over panel 同 door button
+// 4. 停止分數計算（score freeze）
+// 5. disable 所有 gameplay scripts（例如 player、spawner）
+// 6. 停止玩家 Rigidbody2D 嘅移動（速度設為 0）
+
+// This script handles the game over flow when the player hits an obstacle.
+// At start:
+// 1. Hide the game over panel and door button
+
+// When the player collides with an obstacle:
+// 2. Trigger game over (only once)
+// 3. Show the game over panel and door button
+// 4. Stop the score system
+// 5. Disable all gameplay scripts (e.g. player, spawner)
+// 6. Stop the player's Rigidbody2D movement (set velocity to 0)
 using UnityEngine;
 
 public class PlayerHit : MonoBehaviour

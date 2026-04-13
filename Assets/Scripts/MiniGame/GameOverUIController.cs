@@ -1,5 +1,24 @@
-//控制game over畫面入面嘅出口門按鈕顯示邏輯，每第3次die就cant exit，迫玩家多retry幾次
-// This script controls whether the exit door appears on the game over screen, hiding it every 3rd death to encourage more retries.
+// script 控制 game over 畫面嘅出口門顯示邏輯：
+// 一開始：
+// 1. 隱藏出口門按鈕（doorButton）
+
+// 當 game over 畫面出現時：
+// 2. 檢查玩家嘅 restart 次數（restartCount）
+// 3. 如果係第 3、6、9… 次（每 3 次）：
+//    隱藏出口門（迫玩家繼續 retry）
+// 4. 否則：
+//    顯示出口門按鈕
+
+// This script controls the visibility of the exit door on the game over screen.
+// At start:
+// 1. The door button is hidden by default
+
+// When the game over panel is active:
+// 2. Checks the player's restart count (restartCount)
+// 3. If it is every 3rd death (3, 6, 9...):
+//    - Hides the exit door to force more retries
+// 4. Otherwise:
+//    - Shows the exit door button
 
 using UnityEngine;
 

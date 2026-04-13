@@ -1,5 +1,27 @@
-// 控制玩家上下移動，用上下鍵控制，冇重力，input喺Update讀，physics喺FixedUpdate apply
-// This script handles player movement using up and down arrow keys with no gravity, reading input in Update and applying physics in FixedUpdate for stability.
+// script 控制玩家上下移動：
+// 一開始：
+// 1. 關閉 Rigidbody2D 重力（gravityScale = 0）
+// 2. 鎖定旋轉（避免撞到時旋轉）
+
+// 每一幀（Update）：
+// 3. 讀取鍵盤輸入（上 / 下鍵）
+// 4. 計算移動方向（moveY）
+
+// 每個物理幀（FixedUpdate）：
+// 5. 根據 moveY 設定 Rigidbody2D 嘅速度（上下移動）
+
+// This script handles player movement using up and down arrow keys with no gravity.
+// At start:
+// 1. Disable Rigidbody2D gravity (gravityScale = 0)
+// 2. Freeze rotation to prevent spinning on collision
+
+// Every frame (Update):
+// 3. Read keyboard input (up / down arrows)
+// 4. Calculate movement direction (moveY)
+
+// Every physics frame (FixedUpdate):
+// 5. Apply velocity to the Rigidbody2D based on moveY (vertical movement)
+
 
 using UnityEngine;
 using UnityEngine.InputSystem;

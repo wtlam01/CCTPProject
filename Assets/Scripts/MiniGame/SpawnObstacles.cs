@@ -1,5 +1,37 @@
-// 負責生成障礙物，隨機揀Y位置並check有冇overlap，生成間距會隨時間慢慢縮短令難度增加
-// This script spawns obstacles at random vertical positions with overlap checking, gradually reducing spawn intervals over time to increase difficulty.
+// script 控制障礙物生成系統：
+// 每一幀（Update）：
+// 1. 累計時間（timer）
+// 2. 當時間達到生成間距（timeBetweenSpawns）：
+//    - 重置 timer
+//    - 呼叫 SpawnOne() 生成障礙物
+//    - 將生成間距逐步縮短（增加難度，但不低於 minInterval）
+
+// 生成障礙物（SpawnOne）：
+// 3. 隨機揀一個 Y 位置（minY ～ maxY）
+// 4. 檢查附近有冇其他障礙物（避免 overlap）
+// 5. 最多嘗試 maxTries 次搵合適位置
+// 6. 如果搵到：
+//    - instantiate 障礙物
+//    - 隨機套用一個 sprite
+
+
+// This script handles obstacle spawning.
+// Every frame (Update):
+// 1. Accumulate time using a timer
+// 2. When the timer reaches the spawn interval (timeBetweenSpawns):
+//    - Reset the timer
+//    - Call SpawnOne() to create an obstacle
+//    - Gradually reduce the spawn interval (increase difficulty, clamped by minInterval)
+
+// Spawning logic (SpawnOne):
+// 3. Randomly choose a Y position (between minY and maxY)
+// 4. Check for nearby obstacles to avoid overlap
+// 5. Try up to maxTries to find a valid position
+// 6. If a valid position is found:
+//    - Instantiate the obstacle
+//    - Assign a random sprite
+
+
 
 using UnityEngine;
 
