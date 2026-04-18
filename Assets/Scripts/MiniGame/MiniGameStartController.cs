@@ -13,6 +13,7 @@
 // 7. 隱藏 start panel
 // 8. 顯示 gameplay 物件
 // 9. enable 所有 gameplay scripts
+// 10. 開始播放背景音樂
 
 // This script controls the mini game start sequence.
 // At start:
@@ -29,6 +30,7 @@
 // 7. Hides the start panel
 // 8. Shows gameplay objects
 // 9. Enables all gameplay scripts
+// 10. Starts looping background music
 
 using System.Collections;
 using UnityEngine;
@@ -50,6 +52,10 @@ public class MiniGameStartController : MonoBehaviour
     [Header("Show objects when game starts (optional)")]
     public GameObject[] showOnStart;
     // objects to show when game starts, like score text and backgrounds
+
+    [Header("Background Music")]
+    public AudioSource bgMusic;
+    // drag AudioSource component here, set clip in inspector
 
     bool started = false;
     // prevent input being detected more than once
@@ -102,5 +108,12 @@ public class MiniGameStartController : MonoBehaviour
         foreach (var mb in enableOnStart)
             if (mb != null) mb.enabled = true;
         // enable all the gameplay scripts, game officially starts here
+
+        if (bgMusic != null)
+        {
+            bgMusic.loop = true;
+            bgMusic.Play();
+        }
+        // start background music when game begins, loops forever
     }
 }
